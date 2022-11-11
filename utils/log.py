@@ -16,6 +16,7 @@ import logging
 import colorlog
 import time
 import datetime
+from web.index.models import BackendLog
 
 # stream handle
 #
@@ -48,6 +49,24 @@ def log(loglevel, log_name):
     logger.addHandler(handler2)
     logger.addHandler(handler)
     logger.setLevel(loglevel)
+
+    # hook info
+    def newinfo(text):
+        backendLog("system", text)
+        logger.info(text)
+
+    logger.info = newinfo
+
+
+def backendLog(log_type, log_text):
+    """
+    特殊日志进数据库
+    :param log_type:
+    :param log_text:
+    :return:
+    """
+    bl = BackendLog(type=log_type, log_text=log_text)
+    bl.save()
 
 
 if os.path.isdir(log_path) is not True:
