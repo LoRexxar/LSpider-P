@@ -69,7 +69,6 @@ def url_parser(origin, target_list, deep=0, backend_cookies=""):
 
             if temp_result.netloc:
                 request_url = temp_result.geturl()
-
             else:
                 request_url = urljoin(origin, temp_result.path)
 

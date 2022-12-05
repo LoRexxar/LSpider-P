@@ -14,7 +14,7 @@ from urllib.parse import urlparse, parse_qs, urljoin
 
 from web.index.models import AccountDataTable, LoginPageList
 
-from utils.log import logger
+from utils.log import logger, backendLog
 from utils.wechathandler import ReMess
 
 
@@ -54,6 +54,7 @@ Domain: {}
 Url: {}
 Title: {}
 """.format(domain, url, title))
+                backendLog("newloginpage", "Url: {},Title: {}".format(url, title))
 
                 nlp = LoginPageList(domain=domain, url=url, title=title)
                 nlp.save()
@@ -71,6 +72,7 @@ Domain: {}
 Url: {}
 Title: {}
 """.format(domain, url, title))
+                backendLog("newloginpage", "Url: {},Title: {}".format(url, title))
 
                 nlp = LoginPageList(domain=domain, url=url, title=title)
                 nlp.save()

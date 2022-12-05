@@ -52,9 +52,15 @@ def html_parser(content):
             for tag in linkDict[attribute]:
                 tag_list = soup.find_all(tag)
 
+                if tag == "script":
+                    for tag_obj in tag_list:
+                        if tag_obj.get(attribute):
+                            result_list.append({"type": "js", "url": tag_obj.get(attribute)})
+                    continue
+
                 for tag_obj in tag_list:
-                    if get(attribute):
-                        result_list.append({"type": "link", "url": get(attribute)})
+                    if tag_obj.get(attribute):
+                        result_list.append({"type": "link", "url": tag_obj.get(attribute)})
 
         # script_tag_list = soup.find_all('script')
         #

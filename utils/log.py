@@ -61,7 +61,7 @@ def log(loglevel, log_name):
 def backendLog(log_type, log_text):
     """
     特殊日志进数据库
-    :param log_type:
+    :param log_type: 指的是log的类型比如system
     :param log_text:
     :return:
     """

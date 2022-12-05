@@ -91,7 +91,6 @@ class SpiderCoreBackend:
             # self.threadpool.wait_all_thread()
             # 60s 检查一次任务以及线程状态
             self.check_task()
-
             time.sleep(60)
 
     def check_task(self):
