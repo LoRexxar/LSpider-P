@@ -19,7 +19,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 
 from utils.LReq import LReq
-from utils.log import logger
+from utils.log import logger, backendLog
 from utils.base import get_new_scan_id, get_now_scan_id
 from utils.base import check_target
 
@@ -58,7 +58,7 @@ class SpiderCoreBackend:
             i += 1
             spidercore = SpiderCore(self.emergency_target_list)
 
-            logger.debug("[Spider Core] New Thread {} for Spider Core.".format(i))
+            logger.debug("[Spider Core] New Thread {} for emergency Spider Core.".format(i))
 
             if IS_OPEN_RABBITMQ:
                 self.threadpool.new(spidercore.scancore, args=(True,))
@@ -91,7 +91,6 @@ class SpiderCoreBackend:
             # self.threadpool.wait_all_thread()
             # 60s 检查一次任务以及线程状态
             self.check_task()
-
             time.sleep(60)
 
     def check_task(self):
@@ -99,6 +98,22 @@ class SpiderCoreBackend:
         # rabbitmq init
         if IS_OPEN_RABBITMQ:
             self.rabbitmq_handler = RabbitmqHandler()
+
+        # 如果有任务跑在rabbitmq上那么现在不新建任务
+
+        if IS_OPEN_RABBITMQ:
+            left_tasks = self.rabbitmq_handler.get_scan_ready_count()
+            left_emergency_tasks = self.rabbitmq_handler.get_emergency_scan_ready_count()
+        else:
+            left_tasks = self.target_list.qsize()
+            left_emergency_tasks = self.emergency_target_list.qsize()
+
+        logger.info("[Spider Main] now {} targets left.".format(left_tasks))
+        logger.info("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
+
+        if left_tasks > 100:
+            logger.debug("[Spider Main] Left Tasks more than 100. pause to start new task.")
+            return
 
         # checkstatus
         tasklist = ScanTask.objects.filter(is_active=True, is_finished=False)
@@ -119,16 +134,7 @@ class SpiderCoreBackend:
             return
 
         self.scan_id = get_new_scan_id()
-
-        if IS_OPEN_RABBITMQ:
-            left_tasks = self.rabbitmq_handler.get_scan_ready_count()
-            left_emergency_tasks = self.rabbitmq_handler.get_emergency_scan_ready_count()
-        else:
-            left_tasks = self.target_list.qsize()
-            left_emergency_tasks = self.emergency_target_list.qsize()
-
-        logger.info("[Spider Main] Spider id {} Start...now {} targets left.".format(self.scan_id, left_tasks))
-        logger.info("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
+        logger.info("[Spider Main] Spider id {} Start...".format(self.scan_id))
 
     def init_scan(self):
 
@@ -137,6 +143,7 @@ class SpiderCoreBackend:
         target_cookies = ""
         task_is_emergency = False
 
+        # 提取出未启动的任务
         for task in tasklist:
             lastscantime = datetime.datetime.strptime(str(task.last_scan_time)[:19], "%Y-%m-%d %H:%M:%S")
             nowtime = datetime.datetime.now()
@@ -151,7 +158,8 @@ class SpiderCoreBackend:
             target_cookies = task.cookies
             task_is_emergency = task.is_emergency
 
-            # 重设扫描时间
+            # 标志任务开始
+            backendLog("info", "New Task {} start to scan.".format(task.task_name))
             task.last_scan_time = nowtime
             task.is_emergency = False
             task.is_finished = True
