@@ -377,7 +377,7 @@ class ProjectSubdomainListView(View):
         if "size" in request.GET:
             size = int(request.GET['size'])
 
-        ps = ProjectSubdomain.objects.filter(project_id=project_id, is_active=1).values()[(page - 1) * size:page * size]
+        ps = ProjectSubdomain.objects.filter(project_id=project_id, is_active=1).values()
         ps_list = []
 
         # 权重为0的子域名传染权重为2的子域名
@@ -729,7 +729,7 @@ class ProjectUrlsListsView(View):
 
     @staticmethod
     def get(request, project_id):
-        size = 30
+        size = 50
         page = 1
         urllist = []
 
@@ -741,13 +741,32 @@ class ProjectUrlsListsView(View):
 
         sds = ProjectSubdomain.objects.filter(project_id=project_id, is_active=1)
 
+        # 用一套弹性判断数据量的处理方案
+        padding_urls_count = 0
         for sd in sds:
-            urls = UrlTable.objects.filter(domain=sd.subdomain).values()
+            # 查询数据之前直接获取数据长度
+            urls_count = UrlTable.objects.filter(domain=sd.subdomain).count()
+            padding_urls_count += urls_count
+
+            # 如果目前数据总量小于目标区间最小值，则直接跳过
+            if padding_urls_count < size*(page-1):
+                continue
+
+            sub_count = size*(page-1) - padding_urls_count + urls_count
+            if sub_count < 0:
+                sub_count = 0
+            urls = UrlTable.objects.filter(domain=sd.subdomain)[sub_count:sub_count+size].values()
 
             for u in urls:
                 urllist.append(u)
 
-        urllist = urllist[(page - 1) * size:page * size]
+                if len(urllist) > size:
+                    break
+
+            if len(urllist) > size:
+                break
+
+        # urllist = urllist[(page - 1) * size:page * size]
         count = len(urllist)
 
         return JsonResponse({"code": 200, "status": True, "message": urllist, "total": count})
