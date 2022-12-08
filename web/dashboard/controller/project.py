@@ -780,12 +780,10 @@ class ProjectUrlsListCountView(View):
         urllist = []
 
         sds = ProjectSubdomain.objects.filter(project_id=project_id, is_active=1)
+        padding_urls_count = 0
 
         for sd in sds:
-            urls = UrlTable.objects.filter(domain=sd.subdomain).values()
+            urls_count = UrlTable.objects.filter(domain=sd.subdomain).count()
+            padding_urls_count += urls_count
 
-            for u in urls:
-                urllist.append(u)
-
-        count = len(urllist)
-        return JsonResponse({"code": 200, "status": True, "total": count})
+        return JsonResponse({"code": 200, "status": True, "total": padding_urls_count})
