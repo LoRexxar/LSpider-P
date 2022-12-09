@@ -47,6 +47,7 @@ class SpiderCoreBackend:
         self.target_list = Queue()
         self.emergency_target_list = Queue()
         self.threadpool = ThreadPool()
+        self.scan_id = get_now_scan_id()
 
         self.check_task()
         # 获取线程池然后分发信息对象
@@ -121,6 +122,8 @@ class SpiderCoreBackend:
         if tasklist:
             t = threading.Thread(target=self.init_scan)
             t.start()
+
+            self.scan_id = get_new_scan_id()
             time.sleep(3)
 
         # 如果队列为空，那么直接跳出
@@ -133,7 +136,6 @@ class SpiderCoreBackend:
             logger.info("[Spider Core] Spider Target Queue is empty.")
             return
 
-        self.scan_id = get_new_scan_id()
         logger.info("[Spider Main] Spider id {} Start...".format(self.scan_id))
 
     def init_scan(self):
