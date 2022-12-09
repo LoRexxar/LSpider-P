@@ -53,8 +53,9 @@ def log(loglevel, log_name):
     # hook info
     def newinfo(text):
         backendLog("system", text)
-        logger.info(text)
+        logger.oldinfo(text)
 
+    logger.oldinfo = logger.info
     logger.info = newinfo
 
 
