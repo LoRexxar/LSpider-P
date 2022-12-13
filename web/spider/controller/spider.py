@@ -120,11 +120,11 @@ class SpiderCoreBackend:
         tasklist = ScanTask.objects.filter(is_active=True, is_finished=False)
 
         if tasklist:
-            t = threading.Thread(target=self.init_scan)
-            t.start()
-
             # 获得新任务的scan_id
             self.scan_id = get_new_scan_id()
+
+            t = threading.Thread(target=self.init_scan)
+            t.start()
             time.sleep(3)
 
         # 如果队列为空，那么直接跳出
