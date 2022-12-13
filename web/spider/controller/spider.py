@@ -123,6 +123,7 @@ class SpiderCoreBackend:
             t = threading.Thread(target=self.init_scan)
             t.start()
 
+            # 获得新任务的scan_id
             self.scan_id = get_new_scan_id()
             time.sleep(3)
 
@@ -161,8 +162,9 @@ class SpiderCoreBackend:
             task_is_emergency = task.is_emergency
 
             # 标志任务开始
-            backendLog("info", "New Task {} start to scan.".format(task.task_name))
+            backendLog("info", "New Task {} start to scan.New Scan id {}".format(task.task_name, self.scan_id))
             task.last_scan_time = nowtime
+            task.last_scan_id = self.scan_id
             task.is_emergency = False
             task.is_finished = True
             task.save()

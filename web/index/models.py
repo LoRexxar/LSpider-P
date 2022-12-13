@@ -11,6 +11,7 @@ class ScanTask(models.Model):
     target_type = models.CharField(max_length=30, default='link')
     task_tag = models.CharField(max_length=100)
     last_scan_time = models.DateTimeField(auto_now=True)
+    last_scan_id = models.IntegerField(default=0)
     cookies = models.CharField(max_length=5000, default=None, null=True)
     is_active = models.BooleanField(default=False)
     is_emergency = models.BooleanField(default=False)
