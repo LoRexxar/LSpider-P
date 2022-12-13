@@ -126,6 +126,7 @@ class ScanTaskDetailsView(View):
         target = check_gpc_undefined(params, "target")
         target_type = check_gpc_undefined(params, "target_type")
         target_tag = check_gpc_undefined(params, "description")
+        last_scan_id = check_gpc_undefined(params, "last_scan_id", 0)
         last_scan_time = check_gpc_undefined(params, "last_scan_time")
         cookies = check_gpc_undefined(params, "cookies")
         is_active = check_gpc_undefined(params, "is_active", 1)
@@ -137,6 +138,7 @@ class ScanTaskDetailsView(View):
             st.target = target
             st.target_type = target_type
             st.target_tag = target_tag
+            st.last_scan_id = last_scan_id
             st.last_scan_time = last_scan_time
             st.cookies = cookies
             st.is_active = is_active
@@ -435,6 +437,7 @@ class UrlTableListView(View):
         size = 100
         page = 1
         domain = ""
+        scanid = ""
 
         if "page" in request.GET:
             page = int(request.GET['page'])
@@ -442,11 +445,15 @@ class UrlTableListView(View):
         if "size" in request.GET:
             size = int(request.GET['size'])
 
-        if "domain" in request.GET:
-            domain = request.GET['domain']
+        if "domain" in request.GET or "scanid" in request.GET:
+            domain = request.GET['domain'] if 'domain' in request.GET else ""
+            scanid = request.GET['scanid'] if 'scanid' in request.GET else ""
 
-        if domain:
-            urls = UrlTable.objects.filter(domain__contains=domain).values()[(page - 1) * size:page * size]
+        if domain or scanid:
+            if scanid:
+                urls = UrlTable.objects.filter(domain__contains=domain, scanid=scanid).values()[(page - 1) * size:page * size]
+            else:
+                urls = UrlTable.objects.filter(domain__contains=domain).values()[(page - 1) * size:page * size]
         else:
             urls = UrlTable.objects.all().values()[(page - 1) * size:page * size]
 
