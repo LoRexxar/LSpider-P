@@ -35,7 +35,7 @@ class ProjectListView(View):
 
     @staticmethod
     def get(request):
-        size = 10
+        size = 1000
         page = 1
         project_type = 0
 
