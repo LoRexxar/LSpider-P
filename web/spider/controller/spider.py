@@ -92,7 +92,7 @@ class SpiderCoreBackend:
             # self.threadpool.wait_all_thread()
             # 60s 检查一次任务以及线程状态
             self.check_task()
-            time.sleep(60)
+            time.sleep(600)
 
     def check_task(self):
 
@@ -130,11 +130,11 @@ class SpiderCoreBackend:
         # 如果队列为空，那么直接跳出
         if IS_OPEN_RABBITMQ:
             if not self.rabbitmq_handler.get_scan_ready_count():
-                logger.info("[Spider Core] Spider Target Queue is empty.")
+                logger.debug("[Spider Core] Spider Target Queue is empty.")
                 return
 
         if not IS_OPEN_RABBITMQ and self.target_list.empty():
-            logger.info("[Spider Core] Spider Target Queue is empty.")
+            logger.debug("[Spider Core] Spider Target Queue is empty.")
             return
 
         logger.info("[Spider Main] Spider id {} Start...".format(self.scan_id))
