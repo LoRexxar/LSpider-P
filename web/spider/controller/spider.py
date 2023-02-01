@@ -90,7 +90,7 @@ class SpiderCoreBackend:
                     time.sleep(3)
 
             # self.threadpool.wait_all_thread()
-            # 60s 检查一次任务以及线程状态
+            # 600s 检查一次任务以及线程状态
             self.check_task()
             time.sleep(600)
 
@@ -109,8 +109,13 @@ class SpiderCoreBackend:
             left_tasks = self.target_list.qsize()
             left_emergency_tasks = self.emergency_target_list.qsize()
 
-        logger.info("[Spider Main] now {} targets left.".format(left_tasks))
-        logger.info("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
+        # 每天记录一次数据，其他时候不记录
+        if time.time() % 86400 < 600:
+            logger.info("[Spider Main] now {} targets left.".format(left_tasks))
+            logger.info("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
+        else:
+            logger.debug("[Spider Main] now {} targets left.".format(left_tasks))
+            logger.debug("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
 
         if left_tasks > 100:
             logger.debug("[Spider Main] Left Tasks more than 100. pause to start new task.")
