@@ -22,6 +22,7 @@ from utils.LReq import LReq
 from utils.log import logger, backendLog
 from utils.base import get_new_scan_id, get_now_scan_id
 from utils.base import check_target
+from utils import init_config, set_conig
 
 from core.htmlparser import html_parser
 from core.urlparser import url_parser, checkbanlist
@@ -33,7 +34,7 @@ from LSpider.settings import LIMIT_DEEP, IS_OPEN_RABBITMQ
 from LSpider.settings import IS_OPEN_CHROME_PROXY, CHROME_PROXY
 
 from web.spider.models import UrlTable, SubDomainList
-from web.index.models import ScanTask
+from web.index.models import ScanTask, ConfigData
 
 from web.spider.controller.prescan import PrescanCore
 
@@ -48,6 +49,10 @@ class SpiderCoreBackend:
         self.emergency_target_list = Queue()
         self.threadpool = ThreadPool()
         self.scan_id = get_now_scan_id()
+
+        # 初始化配置
+        init_config()
+        set_conig("NOW_SPIDER_TASKID", self.scan_id)
 
         self.check_task()
         # 获取线程池然后分发信息对象
@@ -117,6 +122,9 @@ class SpiderCoreBackend:
             logger.debug("[Spider Main] now {} targets left.".format(left_tasks))
             logger.debug("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
 
+            set_conig("LEFT_SPIDER_COUNT", left_tasks)
+            set_conig("EMERGENCY_LEFT_SPIDER_COUNT", left_emergency_tasks)
+
         if left_tasks > 100:
             logger.debug("[Spider Main] Left Tasks more than 100. pause to start new task.")
             return
@@ -127,6 +135,7 @@ class SpiderCoreBackend:
         if tasklist:
             # 获得新任务的scan_id
             self.scan_id = get_new_scan_id()
+            set_conig("NOW_SPIDER_TASKID", self.scan_id)
 
             t = threading.Thread(target=self.init_scan)
             t.start()

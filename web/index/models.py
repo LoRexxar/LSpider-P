@@ -52,3 +52,10 @@ class FrontLog(models.Model):
     log_text = models.TextField(null=True)
     log_time = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=False)
+
+
+class ConfigData(models.Model):
+    config_name = models.CharField(max_length=100)
+    config_data = models.TextField(null=True)
+    ext = models.CharField(max_length=100, default="", null=True)
+    is_display = models.BooleanField(default=False)
