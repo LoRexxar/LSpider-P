@@ -142,7 +142,7 @@ class SpiderCoreBackend:
             logger.debug("[Spider Core] Spider Target Queue is empty.")
             return
 
-        logger.info("[Spider Main] Spider id {} Start...".format(self.scan_id))
+        logger.debug("[Spider Main] Now Spider id {} ...".format(self.scan_id))
 
     def init_scan(self):
 
