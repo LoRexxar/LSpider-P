@@ -36,7 +36,7 @@ def set_conig(name, data):
     cd = ConfigData.objects.filter(config_name=name).first()
 
     if not cd:
-        c = ConfigData(config_name=name, config_data=data, ext=DEFAULT_CONFIG_EXT[name])
+        c = ConfigData(config_name=name, config_data=data, is_display=True, ext=DEFAULT_CONFIG_EXT[name])
         c.save()
         return True
 
