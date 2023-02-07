@@ -67,6 +67,7 @@ urlpatterns = [
     path("options/projectAssertsSeverity", options.ProjectAssertsSeverity, name="option_project_asserts_severity"),
     path("options/projectVulsSeverity", options.ProjectVulsSeverity, name="option_project_vuls_severity"),
     path("options/scaVulsSeverity", options.ScaVulsSeverity, name="option_sca_severity"),
+    path("options/configDataList", csrf_exempt(options.ConfigDataListView.as_view()), name="option_configdata"),
 
     # users
     path("user", csrf_exempt(user.UserListView.as_view()), name="user"),
