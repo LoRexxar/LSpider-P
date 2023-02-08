@@ -490,7 +490,6 @@ class ProjectSubdomainListPublishView(View):
 class ProjectSubdomainListCountView(View):
 
     @staticmethod
-    @staticmethod
     def get(request, project_id):
         size = 10
         page = 1
