@@ -490,8 +490,40 @@ class ProjectSubdomainListPublishView(View):
 class ProjectSubdomainListCountView(View):
 
     @staticmethod
+    @staticmethod
     def get(request, project_id):
-        count = ProjectSubdomain.objects.filter(project_id=project_id).count()
+        size = 10
+        page = 1
+
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        ps = ProjectSubdomain.objects.filter(project_id=project_id, is_active=1).values()
+        ps_list = []
+
+        # 权重为0的子域名传染权重为2的子域名
+        for p in ps:
+            ps_list.append(p)
+            if p['weight'] == 0:
+                base_subdomain = p['subdomain']
+                sds = SubDomainList.objects.filter(subdomain__endswith=base_subdomain)
+
+                for sd in sds:
+                    ps_list.append(
+                        {
+                            "project_id": p['id'],
+                            "subdomain": sd.subdomain,
+                            "banner": sd.banner,
+                            "title": sd.title,
+                            "weight": 2,
+                            "is_active": 1,
+                        }
+                    )
+        count = len(ps_list)
+
         return JsonResponse({"code": 200, "status": True, "total": count})
 
 
