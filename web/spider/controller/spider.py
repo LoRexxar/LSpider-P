@@ -442,11 +442,10 @@ class SpiderCore:
             title = ""
 
             # 发起对目标的请求
-            if target['type'] == 'link':
-                code, content, title = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
-
             if target['type'] == 'js':
                 code, content, title = self.req.get(target['url'], 'Resp', 0, target['cookies'])
+            else:
+                code, content, title = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
 
             if code == -1:
                 return
