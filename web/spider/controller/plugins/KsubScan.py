@@ -36,29 +36,22 @@ class KsubScan:
             logger.warning("[Pre Scan][KsubScan] {}", p.stderr.read().decode())
             return False
 
-        result = p.stdout.read().decode()
+        result = self.domainparse(domain, p.stdout.read().decode())
         print(result)
         result = []
         return result
 
-    def domainparse(self, domain, content):
-        result_list = [domain]
+    def domainparse(self, domain, result):
+        result_list = []
 
         try:
-            soup = BeautifulSoup(content, "html.parser")
-
-            tr_tag_list = soup.find_all('tr')
-
-            for tr_tag in tr_tag_list:
-                td_tag = tr_tag.find_all('td')
-
-                if len(td_tag) > 4:
-                    predomain_list = td_tag[4].contents
-
-                    for predoamin in predomain_list:
-                        if '.' in predoamin and '*' not in predoamin:
-                            if predoamin not in result_list:
-                                result_list.append(predoamin.strip())
+            for target in result:
+                t = target.split("=>")
+                subdomain = t[0]
+                ip = t[-1]
+                print(subdomain)
+                print(ip)
+                result_list.append(subdomain.strip())
 
         except:
             traceback.print_exc()
