@@ -28,6 +28,14 @@ def checkbanlist(domain):
     return False
 
 
+def check_domain_exist(domain):
+    sd = SubDomainList.objects.filter(subdomain=domain).first()
+    if not sd:
+        sd = SubDomainList(subdomain=domain)
+        sd.save()
+    return True
+
+
 def url_parser(origin, target_list, deep=0, backend_cookies=""):
     """
     通过分割url来给url分类，并试图去重
@@ -53,6 +61,7 @@ def url_parser(origin, target_list, deep=0, backend_cookies=""):
         if checkbanlist(target['url']):
             logger.warning("[Spider][UrlParser] Find Bad Word in domain {}".format(parse_result.netloc))
             continue
+        check_domain_exist(target_domain)
 
         if target_domain not in pre_result_dict:
             pre_result_dict[target_domain] = {}
