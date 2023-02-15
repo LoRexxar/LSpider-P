@@ -29,7 +29,7 @@ class KsubScan:
     def query(self, domain, deep=0):
 
         try:
-            p = subprocess.Popen(["echo", domain, "|", "sudo", self.kspath, "enum", "--stdin", "--silent"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen(["sudo", self.kspath, "enum", "-d", domain, "--silent"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         except:
             logger.warning("[Pre Scan][KsubScan] ksubdomain {} scan error.".format(domain))
