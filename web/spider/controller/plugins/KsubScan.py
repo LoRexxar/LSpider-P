@@ -45,7 +45,7 @@ class KsubScan:
         result_list = []
 
         try:
-            for target in result:
+            for target in result.split("\n"):
                 t = target.split("=>")
                 subdomain = t[0]
                 ip = t[-1]
