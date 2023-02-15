@@ -23,8 +23,8 @@ from LSpider.settings import KSUBDOMAIN_PATH
 class KsubScan:
     def __init__(self):
         self.req = LReq()
-
         self.kspath = KSUBDOMAIN_PATH
+        logger.info("[Pre Scan][KsubScan] start Ksubdomain scan.")
 
     def query(self, domain, deep=0):
 
