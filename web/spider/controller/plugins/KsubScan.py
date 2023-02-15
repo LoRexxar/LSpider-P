@@ -30,7 +30,7 @@ class KsubScan:
 
         try:
             print(" ".join(["echo", domain, "|", self.kspath, "enum", "--stdin", "--silent"]))
-            p = subprocess.Popen(["echo", domain, "|", self.kspath, "enum", "--stdin", "--silent"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen(["echo", domain, "|", "sudo", self.kspath, "enum", "--stdin", "--silent"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         except:
             logger.warning("[Pre Scan][KsubScan] ksubdomain {} scan error.".format(domain))
