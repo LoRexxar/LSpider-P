@@ -20,7 +20,8 @@ class PrescanCore:
     预扫描核心
     """
     def __init__(self):
-        self.plugin_list = ['CrtScan']
+        # self.plugin_list = ['CrtScan']
+        self.plugin_list = ['KsubScan']
         self.pluginObj_list = []
 
         self.result_list = []

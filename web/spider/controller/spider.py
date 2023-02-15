@@ -232,7 +232,8 @@ class SpiderCoreBackend:
                             {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
 
                     else:
-                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}), weight=1)
+                        self.rabbitmq_handler.new_scan_target(json.dumps(
+                            {'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}), weight=1)
                         self.rabbitmq_handler.new_scan_target(json.dumps(
                             {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}), weight=1)
                 else:
@@ -496,8 +497,6 @@ class SpiderCore:
                     self.rabbitmq_handler.new_scan_target(json.dumps(target), weight=task_weight+1)
                 else:
                     self.target_list.put(target)
-
-                # self.target_list.put(target)
 
         except KeyboardInterrupt:
             logger.error("[Scan] Stop Scaning.")

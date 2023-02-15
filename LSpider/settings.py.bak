@@ -227,3 +227,6 @@ IS_TEST_ENVIRONMENT = False
 
 # for register
 IS_OPEN_REGISTER = True
+
+# for ksubdomain
+KSUBDOMAIN_PATH = ""
