@@ -32,7 +32,7 @@ class Command(BaseCommand):
                 logger.error('[PreScan] no domain input.')
                 sys.exit(0)
 
-            logger.info("[PreScan] Hackerone {} Scope spider start.".format(options['domain']))
+            logger.info("[PreScan] {} Scope spider start.".format(options['domain']))
             h = PrescanCore()
             result_list = h.start(options['domain'], False)
 
