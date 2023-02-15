@@ -61,6 +61,7 @@ def url_parser(origin, target_list, deep=0, backend_cookies=""):
         if checkbanlist(target['url']):
             logger.warning("[Spider][UrlParser] Find Bad Word in domain {}".format(parse_result.netloc))
             continue
+
         check_domain_exist(target_domain)
 
         if target_domain not in pre_result_dict:
