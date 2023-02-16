@@ -97,7 +97,7 @@ db.sqlite3
 db.sqlite3*
 
 # sql
-*/migrations/0*
+migrations/0*
 
 venv/*
 settings.py
