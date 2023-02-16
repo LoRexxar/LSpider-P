@@ -49,4 +49,12 @@ urlpatterns = [
     path("subdomainlist/<int:id>", csrf_exempt(scantask.SubDomainDetailsView.as_view()), name="spider_subdomainlist_detail"),
     path("subdomainlist/<int:sub_id>/assign", csrf_exempt(scantask.SubDomainAssignView.as_view()),
          name="spider_subdomainlist_assign"),
+
+    path("subipslist", csrf_exempt(scantask.SubIpsListView.as_view()), name="spider_subipslist"),
+    path("subipslist/count", csrf_exempt(scantask.SubIpsListCountView.as_view()),
+         name="spider_subipslist_count"),
+    path("subipslist/<int:id>", csrf_exempt(scantask.SubIpsDetailsView.as_view()),
+         name="spider_subipslist_detail"),
+    path("subipslist/<int:subip_id>/assign", csrf_exempt(scantask.SubIpsAssignView.as_view()),
+         name="spider_subipslist_assign"),
 ]

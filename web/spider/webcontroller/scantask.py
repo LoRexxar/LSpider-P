@@ -19,9 +19,9 @@ import codecs
 from django.views import View
 from django.http import HttpResponse, JsonResponse
 
-from web.dashboard.models import Project, ProjectSubdomain
+from web.dashboard.models import Project, ProjectSubdomain, ProjectIps
 from web.index.models import ScanTask, LoginPageList, BanList, AccountDataTable
-from web.spider.models import SubDomainList, UrlTable
+from web.spider.models import SubDomainList, UrlTable, SubIpList
 
 from utils.base import check_gpc_undefined
 from web.index.middleware import login_level1_required, login_level2_required, login_level3_required, login_level4_required, login_required
@@ -658,3 +658,121 @@ class SubDomainAssignView(View):
             return JsonResponse({"code": 200, "status": True, "message": "New Project Subdomain successful"})
         else:
             return JsonResponse({"code": 404, "status": False, "message": "Subdomain {} not Found.".format(sub_id)})
+
+
+class SubIpsListView(View):
+    """
+        SubIpsListView
+    """
+
+    @staticmethod
+    @login_level2_required
+    def get(request):
+        size = 20
+        page = 1
+        subdomain = ""
+        ips = ""
+
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        if "subdomain" in request.GET or "ips" in request.GET:
+            subdomain = request.GET['subdomain'] if 'subdomain' in request.GET else ""
+            ips = request.GET['ips'] if 'ips' in request.GET else ""
+
+        if subdomain or ips:
+            sis = SubIpList.objects.filter(subdomain__contains=subdomain, ips__contains=ips).values()[
+                   (page - 1) * size:page * size]
+        else:
+            sis = SubIpList.objects.all().values()[(page - 1) * size:page * size]
+
+        count = len(sis)
+        sis_list = list(sis)
+
+        return JsonResponse({"code": 200, "status": True, "message": sis_list, "total": count})
+
+    @staticmethod
+    @login_level3_required
+    def post(request):
+        params = json.loads(request.body)
+
+        subdomain = check_gpc_undefined(params, "subdomain")
+        ips = check_gpc_undefined(params, "ips")
+        ext = check_gpc_undefined(params, "ext")
+
+        sis = SubIpList.objects.filter(subdomain=subdomain).first()
+        if sis:
+            return JsonResponse({"code": 500, "status": False, "message": "Subdomain {}  is exists".format(subdomain)})
+
+        sis = SubIpList(subdomain=subdomain, ips=ips, ext=ext)
+        sis.save()
+
+        return JsonResponse({"code": 200, "status": True, "message": "New Sub2ip successful"})
+
+
+class SubIpsListCountView(View):
+
+    @staticmethod
+    @login_level2_required
+    def get(request):
+        count = SubIpList.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count})
+
+
+class SubIpsDetailsView(View):
+    """
+    """
+
+    @staticmethod
+    @login_level3_required
+    def get(request, id):
+        sis = SubIpList.objects.filter(id=id).values()
+        count = len(sis)
+
+        return JsonResponse({"code": 200, "status": True, "message": list(sis), "total": count, })
+
+    @staticmethod
+    @login_level3_required
+    def post(request, id):
+        params = json.loads(request.body)
+
+        sis = SubIpList.objects.filter(id=id).first()
+
+        subdomain = check_gpc_undefined(params, "subdomain")
+        ips = check_gpc_undefined(params, "ips")
+        ext = check_gpc_undefined(params, "ext")
+
+        if sis:
+            sis.subdomain = subdomain
+            sis.ips = ips
+            sis.ext = ext
+            sis.save()
+            return JsonResponse({"code": 200, "status": True, "message": "Update Sub2ip successful"})
+        else:
+            return JsonResponse({"code": 404, "status": False, "message": "Subdomain {} not Found.".format(id)})
+
+
+class SubIpsAssignView(View):
+
+    @staticmethod
+    @login_level3_required
+    def post(request, subip_id):
+        params = json.loads(request.body)
+
+        sis = SubIpList.objects.filter(id=subip_id).first()
+        project_id = check_gpc_undefined(params, "project_id", 0)
+
+        if sis:
+            p = Project.objects.filter(id=project_id).first()
+
+            if not p:
+                return JsonResponse({"code": 404, "status": False, "message": "Project {} not Found.".format(p.id)})
+
+            pips = ProjectIps(project_id=p.id, ips=sis.ips, ext=sis.subdomain)
+            pips.save()
+            return JsonResponse({"code": 200, "status": True, "message": "New Project Subdomain successful"})
+        else:
+            return JsonResponse({"code": 404, "status": False, "message": "Subdomain {} not Found.".format(subip_id)})
