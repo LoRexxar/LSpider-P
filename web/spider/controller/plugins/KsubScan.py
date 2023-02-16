@@ -56,7 +56,7 @@ class KsubScan:
                 t = target.split("=>")
                 subdomain = t[0]
                 ip = t[-1]
-
+                self.check_ip_exist(subdomain, ip)
 
                 if subdomain:
                     result_list.append(subdomain.strip())
