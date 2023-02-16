@@ -18,6 +18,7 @@ from utils.LReq import LReq
 from utils.log import logger
 
 from LSpider.settings import KSUBDOMAIN_PATH
+from web.spider.models import SubIpList
 
 
 class KsubScan:
@@ -36,12 +37,18 @@ class KsubScan:
             logger.warning("[Pre Scan][KsubScan] {}", p.stderr.read().decode())
             return False
 
-        result = self.domainparse(domain, p.stdout.read().decode())
-        print(result)
-        result = []
+        result = self.domain_parse(domain, p.stdout.read().decode())
         return result
 
-    def domainparse(self, domain, result):
+    def check_ip_exist(self, domain, ip):
+        si = SubIpList.objects.filter(subdomain=domain, ips=ip)
+        if not si:
+            si = SubIpList(subdomain=domain, ips=ip)
+            si.save()
+
+        return True
+
+    def domain_parse(self, domain, result):
         result_list = []
 
         try:
@@ -49,9 +56,10 @@ class KsubScan:
                 t = target.split("=>")
                 subdomain = t[0]
                 ip = t[-1]
-                print(subdomain)
-                print(ip)
-                result_list.append(subdomain.strip())
+
+
+                if subdomain:
+                    result_list.append(subdomain.strip())
 
         except:
             traceback.print_exc()

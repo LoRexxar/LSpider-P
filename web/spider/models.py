@@ -28,3 +28,10 @@ class UrlTable(models.Model):
 
 class ScanTable(models.Model):
     scantime = models.DateTimeField(auto_now=True)
+
+
+class SubIpList(models.Model):
+    subdomain = models.CharField(max_length=200)
+    ips = models.CharField(max_length=200)
+    ext = models.CharField(max_length=1000, null=True, default="")
+    updatetime = models.DateTimeField(auto_now=True)
