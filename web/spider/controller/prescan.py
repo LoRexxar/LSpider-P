@@ -21,9 +21,8 @@ class PrescanCore:
     """
     def __init__(self):
         # self.plugin_list = ['CrtScan']
-        self.plugin_list = ['KsubScan']
+        self.plugin_list = ['CrtScan', 'KsubScan']
         self.pluginObj_list = []
-
         self.result_list = []
 
         self.init_import()
