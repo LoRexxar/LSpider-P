@@ -9,10 +9,9 @@
 
 '''
 
-import requests
+import os
 import traceback
 import subprocess
-from bs4 import BeautifulSoup
 
 from utils.LReq import LReq
 from utils.log import logger
@@ -25,11 +24,19 @@ class KsubScan:
     def __init__(self):
         self.req = LReq()
         self.kspath = KSUBDOMAIN_PATH
+        self.is_install = True
+
+        if not os.path.exists(self.kspath):
+            self.is_install = False
+            logger.warning("[Pre Scan][KsubScan] Ksubdomain path {} not found. need install.".format(self.kspath))
+
         logger.info("[Pre Scan][KsubScan] start Ksubdomain scan.")
 
     def query(self, domain, deep=0):
-
         try:
+            if not self.is_install:
+                return []
+
             p = subprocess.Popen(["sudo", self.kspath, "enum", "-d", domain, "--silent"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         except:
@@ -41,9 +48,12 @@ class KsubScan:
         return result
 
     def check_ip_exist(self, domain, ip):
-        si = SubIpList.objects.filter(subdomain=domain, ips=ip)
+        si = SubIpList.objects.filter(subdomain=domain)
         if not si:
             si = SubIpList(subdomain=domain, ips=ip)
+            si.save()
+        else:
+            si.ips = ip
             si.save()
 
         return True
