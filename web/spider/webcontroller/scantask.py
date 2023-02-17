@@ -680,8 +680,8 @@ class SubIpsListView(View):
             size = int(request.GET['size'])
 
         if "subdomain" in request.GET or "ips" in request.GET:
-            subdomain = request.GET['subdomain'] if 'subdomain' in request.GET else ""
-            ips = request.GET['ips'] if 'ips' in request.GET else ""
+            subdomain = request.GET['subdomain'].strip() if 'subdomain' in request.GET else ""
+            ips = request.GET['ips'].strip() if 'ips' in request.GET else ""
 
         if subdomain or ips:
             sis = SubIpList.objects.filter(subdomain__contains=subdomain, ips__contains=ips).values()[

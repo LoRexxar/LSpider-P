@@ -93,6 +93,9 @@ def check_gpc_undefined(params, name, default=""):
     :return:
     """
     if name in params:
-        return params[name]
+        if isinstance(params[name], str):
+            return params[name].strip()
+        else:
+            return params[name]
 
     return default
