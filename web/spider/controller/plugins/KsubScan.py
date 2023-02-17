@@ -10,6 +10,7 @@
 '''
 
 import os
+import re
 import traceback
 import subprocess
 
@@ -48,6 +49,11 @@ class KsubScan:
         return result
 
     def check_ip_exist(self, domain, ip):
+        # 检查ip的格式
+        matchobj = re.match(ip, "[0-9]{1,3}(\.[0-9]{1,3}){1,3}", re.M | re.I)
+        if not matchobj:
+            return False
+
         si = SubIpList.objects.filter(subdomain=domain)
         if not si:
             si = SubIpList(subdomain=domain, ips=ip)
@@ -64,8 +70,8 @@ class KsubScan:
         try:
             for target in result.split("\n"):
                 t = target.split("=>")
-                subdomain = t[0]
-                ip = t[-1]
+                subdomain = t[0].strip()
+                ip = t[-1].strip()
                 self.check_ip_exist(subdomain, ip)
 
                 if subdomain:
