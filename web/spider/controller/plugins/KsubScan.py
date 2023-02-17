@@ -54,7 +54,7 @@ class KsubScan:
         if not matchobj:
             return False
 
-        si = SubIpList.objects.filter(subdomain=domain)
+        si = SubIpList.objects.filter(subdomain=domain).first()
         if not si:
             si = SubIpList(subdomain=domain, ips=ip)
             si.save()
