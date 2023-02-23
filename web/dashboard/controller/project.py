@@ -21,7 +21,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from web.dashboard.models import Project, ProjectAssets, ProjectIps, ProjectVuls, ProjectSubdomain, ProjectAnnouncement
-from web.spider.models import SubDomainList, UrlTable
+from web.spider.models import SubDomainList, UrlTable, SubIpList
 from django.contrib.auth.models import User
 from utils.base import check_gpc_undefined
 
@@ -437,6 +437,13 @@ class ProjectSubdomainListView(View):
         ps2 = ProjectSubdomain(project_id=project_id, subdomain=subdomain, title=title,
                                banner=banner, weight=weight, is_active=True)
         ps2.save()
+
+        # 添加新的域名的时候，可以批量扫描ip列表并加入project ips表
+        sip = SubIpList.objects.filter(subdomain=subdomain).first()
+        if sip:
+            pip = ProjectIps(project_id=project_id, ips=sip.ips, ext=sip.subdomain, is_active=1)
+            pip.save()
+
         return JsonResponse({"code": 200, "status": True, "message": "New Project Subdomain successful"})
 
 
