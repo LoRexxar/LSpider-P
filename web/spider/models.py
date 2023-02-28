@@ -11,6 +11,7 @@ class SubDomainList(models.Model):
     lastscan = models.DateTimeField(auto_now=True)
     is_finished = models.BooleanField(default=False)
     is_emergency = models.BooleanField(default=False)
+    is_assign = models.BooleanField(default=False)
 
 
 URL_TYPE = {

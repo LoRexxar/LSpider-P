@@ -14,7 +14,7 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
 from web.dashboard import views
-from web.spider.webcontroller import profile, result, scantask
+from web.spider.webcontroller import profile, result, scantask, backend
 
 
 app_name = "spider"
@@ -57,4 +57,8 @@ urlpatterns = [
          name="spider_subipslist_detail"),
     path("subipslist/<int:subip_id>/assign", csrf_exempt(scantask.SubIpsAssignView.as_view()),
          name="spider_subipslist_assign"),
+
+    path("backend/subdomainlist", csrf_exempt(backend.SubdomainGroupListView.as_view()), name="spider_subdomainlist"),
+    path("backend/subdomainlist/assign", csrf_exempt(backend.SubdomainGroupAssignView.as_view()),
+         name="spider_subdomainlist_count"),
 ]
