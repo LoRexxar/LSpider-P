@@ -385,7 +385,7 @@ class ProjectSubdomainListView(View):
             ps_list.append(p)
             if p['weight'] == 0:
                 base_subdomain = p['subdomain']
-                sds = SubDomainList.objects.filter(subdomain__endswith=base_subdomain)
+                sds = SubDomainList.objects.filter(subdomain__endswith=base_subdomain, is_assign=False)
 
                 for sd in sds:
                     ps_list.append(
