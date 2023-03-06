@@ -83,6 +83,9 @@ class SubdomainGroupAssignView(View):
         if not p:
             return JsonResponse({"code": 404, "status": False, "message": "Not Found Project {}.".format(p.id)})
 
+        if not root_domain:
+            return JsonResponse({"code": 404, "status": False, "message": "missing required parameter"})
+
         # 根据根域名来聚合其他未分配的域名
         subds = SubDomainList.objects.filter(subdomain__iendswith=root_domain, is_assign=False)
 
