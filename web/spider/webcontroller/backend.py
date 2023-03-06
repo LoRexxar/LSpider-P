@@ -77,7 +77,7 @@ class SubdomainGroupAssignView(View):
         params = json.loads(request.body)
 
         project_id = check_gpc_undefined(params, "project_id", 0)
-        root_domain = check_gpc_undefined(params, "root")
+        root_domain = check_gpc_undefined(params, "rootdomain")
 
         p = Project.objects.filter(id=project_id).first()
         if not p:
