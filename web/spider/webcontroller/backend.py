@@ -91,6 +91,10 @@ class SubdomainGroupAssignView(View):
         psub.save()
 
         for subd in subds:
+            psub = ProjectSubdomain.objects.filter(project_id=p.id, subdomain=subd.subdomain).first()
+            if psub:
+                continue
+
             # 分配给project
             psub = ProjectSubdomain(project_id=p.id, subdomain=subd.subdomain, title=subd.title, banner=subd.banner,
                                     weight=1, is_active=1)
