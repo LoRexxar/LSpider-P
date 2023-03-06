@@ -51,7 +51,7 @@ class SubdomainGroupListView(View):
             root_domain = ".".join(subdomain_parse)
 
             # 特殊后缀特殊处理
-            if root_domain in ["com.cn"]:
+            if root_domain.lower() in ["com.cn"]:
                 subdomain_parse = subdomain.split(".")[-3:]
 
             root_domain = ".".join(subdomain_parse)
