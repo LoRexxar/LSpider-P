@@ -19,7 +19,7 @@ import codecs
 from django.views import View
 from django.http import HttpResponse, JsonResponse
 
-from web.dashboard.models import ProjectSubdomain, Project
+from web.dashboard.models import ProjectSubdomain, Project, ProjectIps
 from web.spider.models import SubDomainList, SubIpList
 from web.index.middleware import login_level1_required, login_level2_required, login_level3_required, login_level4_required, login_required
 from utils.base import check_gpc_undefined
@@ -105,6 +105,12 @@ class SubdomainGroupAssignView(View):
                 psub = ProjectSubdomain(project_id=p.id, subdomain=subd.subdomain, title=subd.title, banner=subd.banner,
                                         weight=1, is_active=1)
                 psub.save()
+
+                # 顺便分配ip
+                subips = SubIpList.objects.filter(subdomain=subd.subdomain).firts()
+                if subips:
+                    pip = ProjectIps(project_id=p.id, ips=subips.ips, ext=subd.subdomain, is_active=1)
+                    pip.save()
 
             # 修改is_assign
             subd.is_assign = True
