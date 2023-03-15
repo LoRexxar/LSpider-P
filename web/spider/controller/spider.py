@@ -30,7 +30,7 @@ from core.threadingpool import ThreadPool
 from core.rabbitmqhandler import RabbitmqHandler
 from core.domainauthcheck import check_login_or_get_cookie
 
-from LSpider.settings import LIMIT_DEEP, IS_OPEN_RABBITMQ
+from LSpider.settings import LIMIT_DEEP, IS_OPEN_RABBITMQ, IS_RECORD_AUTH_PAGE, IS_REINSERT_AUTH_PAGE
 from LSpider.settings import IS_OPEN_CHROME_PROXY, CHROME_PROXY
 
 from web.spider.models import UrlTable, SubDomainList
@@ -452,19 +452,21 @@ class SpiderCore:
                 return
 
             # 如果这个页面需要登录，那么把链接塞入加急队列之后等待对应的鉴权被设置
-            if code == 2:
+            # 加入限制允许暂时关闭这个功能
+            if IS_RECORD_AUTH_PAGE and code == 2:
                 # 代表这个页面需要登录
                 backend_cookies, auth_status = check_login_or_get_cookie(target['url'], title)
 
-                # 任务塞到加急队列中
-                new_target = target
-                new_target['cookies'] = backend_cookies
+                if IS_REINSERT_AUTH_PAGE:
+                    # 任务塞到加急队列中
+                    new_target = target
+                    new_target['cookies'] = backend_cookies
 
-                # 如果获取到鉴权，那么任务放回主线程并增加权重
-                if backend_cookies:
-                    self.rabbitmq_handler.new_scan_target(json.dumps(new_target), weight=5)
-                else:
-                    self.rabbitmq_handler.new_emergency_scan_target(json.dumps(new_target))
+                    # 如果获取到鉴权，那么任务放回主线程并增加权重
+                    if backend_cookies:
+                        self.rabbitmq_handler.new_scan_target(json.dumps(new_target), weight=5)
+                    else:
+                        self.rabbitmq_handler.new_emergency_scan_target(json.dumps(new_target))
 
             else:
                 backend_cookies = target['cookies']
