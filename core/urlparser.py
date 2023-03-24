@@ -91,6 +91,9 @@ def url_parser(origin, target_list, deep=0, backend_cookies=""):
 
             # save data
             # check exist
+            if len(request_url) > 2000:
+                continue
+
             url = UrlTable.objects.filter(domain=target_domain, url=request_url)
             if url:
                 continue

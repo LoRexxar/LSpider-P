@@ -255,6 +255,10 @@ class ChromeDriver:
                 self.check_back()
                 continue
 
+            except selenium.common.exceptions.MoveTargetOutOfBoundsException:
+                self.check_back()
+                continue
+
             except selenium.common.exceptions.StaleElementReferenceException:
                 logger.warning("[ChromeHeadless][Click Page] page reload or wrong back redirect")
 
