@@ -157,7 +157,6 @@ class ChromeDriver:
 
         except selenium.common.exceptions.InvalidSessionIdException:
             logger.warning("[ChromeHeadless]Chrome Headless quit unexpectedly..")
-
             self.init_object()
 
             logger.warning("[ChromeHeadless]retry once..{}".format(url))
@@ -246,6 +245,12 @@ class ChromeDriver:
 
             except selenium.common.exceptions.ElementNotInteractableException as e:
                 logger.warning("[ChromeHeadless][Click Page] error interact. {}".format(e))
+
+                self.check_back()
+                continue
+
+            except selenium.common.exceptions.ElementClickInterceptedException:
+                logger.warning("[ChromeHeadless][Click Page] element is not clickable.")
 
                 self.check_back()
                 continue
