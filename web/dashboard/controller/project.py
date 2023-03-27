@@ -20,7 +20,7 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from web.dashboard.models import Project, ProjectAssets, ProjectIps, ProjectVuls, ProjectSubdomain, ProjectAnnouncement
+from web.dashboard.models import Project, ProjectSource, ProjectAssets, ProjectIps, ProjectVuls, ProjectSubdomain, ProjectAnnouncement
 from web.spider.models import SubDomainList, UrlTable, SubIpList
 from django.contrib.auth.models import User
 from utils.base import check_gpc_undefined
@@ -97,8 +97,12 @@ class ProjectDetailsView(View):
 
         ps = Project.objects.filter(id=project_id, is_active=1).values()
         count = len(ps)
+        ps_list = list(ps)
 
-        return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
+        pss_list = list(ProjectSource.objects.filter(project_id=project_id, is_active=True).values())
+        ps_list[0]['extra'] = pss_list
+
+        return JsonResponse({"code": 200, "status": True, "message": ps_list, "total": count})
 
     @staticmethod
     def post(request, project_id):
@@ -825,3 +829,107 @@ class ProjectUrlsListCountView(View):
             padding_urls_count += urls_count
 
         return JsonResponse({"code": 200, "status": True, "total": padding_urls_count})
+
+
+class ProjectSourceListView(View):
+    """
+        外挂链接
+    """
+
+    @staticmethod
+    @login_level3_required
+    def get(request):
+        size = 10
+        page = 1
+
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        ps = ProjectSource.objects.all().values()[
+             (page - 1) * size:page * size]
+        count = len(ps)
+
+        return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
+
+    @staticmethod
+    @login_level3_required
+    def post(request):
+        params = json.loads(request.body)
+
+        if "project_id" not in params:
+            return JsonResponse({"code": 404, "status": False, "message": "Required parameter not found"})
+
+        project_id = check_gpc_undefined(params, "project_id", 0)
+        p = Project.objects.filter(id=project_id).first()
+
+        if not p:
+            return JsonResponse({"code": 404, "status": False, "message": "Project not found"})
+
+        title = check_gpc_undefined(params, "title")
+        content = check_gpc_undefined(params, "content")
+        stype = check_gpc_undefined(params, "type", 0)
+        is_active = check_gpc_undefined(params, "is_active", 1)
+
+        ps = ProjectSource.objects.filter(project_id=p.id, title=title).first()
+
+        if ps:
+            ps.title = title
+            ps.content = content
+            ps.type = stype
+            ps.is_active = is_active
+            ps.save()
+
+            return JsonResponse({"code": 200, "status": True, "message": "update successful"})
+
+        ps2 = ProjectSource(project_id=project_id, title=title, content=content, type=stype, is_active=True)
+        ps2.save()
+        return JsonResponse({"code": 200, "status": True, "message": "New project Source successful"})
+
+
+class ProjectSourcesListCountView(View):
+
+    @staticmethod
+    @login_level3_required
+    def get(request):
+        count = ProjectSource.objects.all().count()
+        return JsonResponse({"code": 200, "status": True, "total": count})
+
+
+class ProjectSourcesDetailsView(View):
+    """
+        项目来源详情/修改
+    """
+
+    @staticmethod
+    @login_level3_required
+    def get(request, source_id):
+
+        ps = ProjectSource.objects.filter(id=source_id).values()
+        count = len(ps)
+
+        return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
+
+    @staticmethod
+    @login_level3_required
+    def post(request, source_id):
+        params = json.loads(request.body)
+        ps = ProjectSource.objects.filter(id=source_id).first()
+
+        title = check_gpc_undefined(params, "title")
+        content = check_gpc_undefined(params, "content")
+        stype = check_gpc_undefined(params, "type", 0)
+        is_active = check_gpc_undefined(params, "is_active", 1)
+
+        if ps:
+            ps.title = title
+            ps.content = content
+            ps.type = stype
+            ps.is_active = is_active
+            ps.save()
+
+            return JsonResponse({"code": 200, "status": True, "message": "update successful"})
+        else:
+            return JsonResponse({"code": 404, "status": False, "message": "ProjectSource not found"})

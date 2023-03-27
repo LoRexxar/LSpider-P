@@ -15,6 +15,14 @@ class Project(models.Model):
     is_active = models.BooleanField(default=True)
 
 
+class ProjectSource(models.Model):
+    project_id = models.IntegerField()
+    type = models.IntegerField(default=0)
+    title = models.CharField(max_length=100)
+    content = models.CharField(max_length=1000)
+    is_active = models.BooleanField(default=True)
+
+
 class ProjectAssets(models.Model):
     project_id = models.IntegerField()
     name = models.CharField(max_length=200)

@@ -59,6 +59,11 @@ urlpatterns = [
     path("project/<int:project_id>/urls/count", csrf_exempt(project.ProjectUrlsListCountView.as_view()),
          name="project_urls_count"),
 
+    # project child table
+    path("projectsource", csrf_exempt(project.ProjectSourceListView.as_view()), name="project_source"),
+    path("projectsource/count", csrf_exempt(project.ProjectSourcesListCountView.as_view()), name="project_source_count"),
+    path("projectsource/<int:source_id>", csrf_exempt(project.ProjectSourcesDetailsView.as_view()), name="project_source_detail"),
+
     # options
     path("options/vultype", csrf_exempt(options.VulTypeListView.as_view()), name="vultype"),
 
