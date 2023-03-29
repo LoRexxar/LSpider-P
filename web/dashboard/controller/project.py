@@ -114,12 +114,14 @@ class ProjectDetailsView(View):
         source = check_gpc_undefined(params, "source")
         type = check_gpc_undefined(params, "type", 0)
         description = check_gpc_undefined(params, "description")
+        is_active = check_gpc_undefined(params, "is_active", 1)
 
         if ps:
             ps.project_name = project_name
             ps.source = source
             ps.type = type
             ps.description = description
+            ps.is_active = is_active
             ps.save()
             return JsonResponse({"code": 200, "status": True, "message": "update successful"})
         else:
