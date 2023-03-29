@@ -841,6 +841,7 @@ class ProjectSourceListView(View):
     def get(request):
         size = 10
         page = 1
+        title = ""
 
         if "page" in request.GET:
             page = int(request.GET['page'])
@@ -848,8 +849,14 @@ class ProjectSourceListView(View):
         if "size" in request.GET:
             size = int(request.GET['size'])
 
-        ps = ProjectSource.objects.all().values()[
-             (page - 1) * size:page * size]
+        if "title" in request.GET:
+            title = request.GET['title'].strip()
+
+        if title:
+            ps = ProjectSource.objects.filter(title__contains=title).values()[(page - 1) * size:page * size]
+        else:
+            ps = ProjectSource.objects.all().values()[(page - 1) * size:page * size]
+
         count = len(ps)
 
         return JsonResponse({"code": 200, "status": True, "message": list(ps), "total": count})
