@@ -24,4 +24,5 @@ urlpatterns = [
     # link to front
     path('api/', include('web.dashboard.urls')),
     path('api/spider/', include('web.spider.urls')),
+    path('api/info/', include('web.info.urls')),
 ]
