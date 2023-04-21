@@ -36,4 +36,8 @@ urlpatterns = [
          name="wechat_article_count"),
     path("wechat/article/<int:art_id>", csrf_exempt(wechat.WechatArticleDetailsView.as_view()),
          name="wechat_article_detail"),
+
+    path("wechat/profile", csrf_exempt(wechat.WechatProfileListView.as_view()), name="wechat_profile"),
+    path("wechat/profile/<int:pro_id>", csrf_exempt(wechat.WechatProfileDetailsView.as_view()),
+         name="wechat_profile_detail"),
 ]

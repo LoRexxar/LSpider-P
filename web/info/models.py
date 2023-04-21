@@ -110,3 +110,13 @@ class WechatArticleTask(models.Model):
     class Meta:
         managed = False
         db_table = 'wechat_article_task'
+
+
+class WechatProfile(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    profile_name = models.CharField(max_length=100, null=True)
+    value = models.TextField(null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'wechat_profile'

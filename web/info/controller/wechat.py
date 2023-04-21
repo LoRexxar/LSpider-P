@@ -18,7 +18,7 @@ from django.http import HttpResponse, JsonResponse
 
 from utils.base import check_gpc_undefined
 from web.index.middleware import login_level1_required, login_level2_required, login_level3_required, login_level4_required, login_required
-from web.info.models import WechatAccount, WechatAccountTask, WechatArticle, WechatArticleComment, WechatArticleDynamic, WechatArticleList, WechatArticleTask
+from web.info.models import WechatAccount, WechatAccountTask, WechatArticle, WechatProfile
 
 
 class WechatAccountListView(View):
@@ -359,3 +359,69 @@ class WechatArticleDetailsView(View):
         else:
             return JsonResponse({"code": 404, "status": False, "message": "Wechat Article Task not found"})
 
+
+class WechatProfileListView(View):
+    """
+        爬虫配置
+    """
+
+    @staticmethod
+    @login_level4_required
+    def get(request):
+        size = 10
+        page = 1
+
+        if "page" in request.GET:
+            page = int(request.GET['page'])
+
+        if "size" in request.GET:
+            size = int(request.GET['size'])
+
+        wps = WechatProfile.objects.all().using("wechat").values()[::-1][(page - 1) * size:page * size]
+
+        return JsonResponse({"code": 200, "status": True, "message": list(wps)})
+
+    @staticmethod
+    @login_level4_required
+    def post(request):
+        params = json.loads(request.body)
+
+        profile_name = check_gpc_undefined(params, "profile_name")
+        value = check_gpc_undefined(params, "value")
+
+        wps = WechatProfile(profile_name=profile_name, value=value)
+        wps.save()
+        return JsonResponse({"code": 200, "status": True, "message": "Insert success."})
+
+
+class WechatProfileDetailsView(View):
+    """
+        爬虫配置详情
+    """
+
+    @staticmethod
+    @login_level4_required
+    def get(request, pro_id):
+
+        wps = WechatProfile.objects.filter(id=pro_id).using("wechat").values()
+
+        return JsonResponse({"code": 200, "status": True, "message": list(wps)})
+
+    @staticmethod
+    @login_level4_required
+    def post(request, pro_id):
+        params = json.loads(request.body)
+
+        wp = WechatProfile.objects.filter(id=pro_id).using("wechat").first()
+
+        profile_name = check_gpc_undefined(params, "profile_name")
+        value = check_gpc_undefined(params, "value")
+
+        if wp:
+            wp.profile_name = profile_name
+            wp.value = value
+            wp.save()
+
+            return JsonResponse({"code": 200, "status": True, "message": "update successful"})
+        else:
+            return JsonResponse({"code": 404, "status": False, "message": "Wechat Profile not found"})
