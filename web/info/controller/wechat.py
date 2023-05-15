@@ -250,7 +250,7 @@ class WechatArticleListView(View):
         if title:
             warts = WechatArticle.objects.filter(title__contains=title).using("wechat").order_by("-publish_time").values()[::-1][(page - 1) * size:page * size]
         else:
-            warts = WechatArticle.objects.all().using("wechat").values()[::-1][(page - 1) * size:page * size]
+            warts = WechatArticle.objects.all().using("wechat").order_by("-publish_time").values()[::-1][(page - 1) * size:page * size]
         count = len(warts)
 
         return JsonResponse({"code": 200, "status": True, "message": list(warts), "total": count})
