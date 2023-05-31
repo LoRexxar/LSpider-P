@@ -189,7 +189,7 @@ class MonitorTaskCountView(View):
             name = request.GET['name']
 
         if type:
-            count = MonitorTask.objects.filter(name_contains=name).using("lmonitor").count()
+            count = MonitorTask.objects.filter(name__contains=name).using("lmonitor").count()
         else:
             count = MonitorTask.objects.all().using("lmonitor").count()
         return JsonResponse({"code": 200, "status": True, "total": count})
@@ -407,9 +407,9 @@ class TargetAuthDetailsView(View):
 
     @staticmethod
     @login_level4_required
-    def get(request, pro_id):
+    def get(request, auth_id):
 
-        tas = TargetAuth.objects.filter(id=pro_id).using("lmonitor").values()
+        tas = TargetAuth.objects.filter(id=auth_id).using("lmonitor").values()
 
         return JsonResponse({"code": 200, "status": True, "message": list(tas)})
 
