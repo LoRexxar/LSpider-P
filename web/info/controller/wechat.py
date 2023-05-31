@@ -18,7 +18,7 @@ from django.http import HttpResponse, JsonResponse
 
 from utils.base import check_gpc_undefined
 from web.index.middleware import login_level1_required, login_level2_required, login_level3_required, login_level4_required, login_required
-from web.info.models import WechatAccount, WechatAccountTask, WechatArticle, WechatProfile
+from web.info.models import WechatAccountTask, WechatArticle, TargetAuth, MonitorTask
 
 
 class WechatAccountListView(View):
@@ -43,9 +43,9 @@ class WechatAccountListView(View):
             account = request.GET['account'].strip()
 
         if account:
-            was = WechatAccount.objects.filter(account__contains=account).using("wechat").values()[::-1][(page - 1) * size:page * size]
+            was = WechatAccountTask.objects.filter(account__contains=account).using("lmonitor").values()[::-1][(page - 1) * size:page * size]
         else:
-            was = WechatAccount.objects.all().using("wechat").values()[::-1][(page - 1) * size:page * size]
+            was = WechatAccountTask.objects.all().using("lmonitor").values()[::-1][(page - 1) * size:page * size]
         count = len(was)
 
         return JsonResponse({"code": 200, "status": True, "message": list(was), "total": count})
@@ -57,13 +57,12 @@ class WechatAccountListView(View):
 
         biz = check_gpc_undefined(params, "biz")
         account = check_gpc_undefined(params, "account")
-        head_url = check_gpc_undefined(params, "head_url")
         summary = check_gpc_undefined(params, "summary")
-        qr_code = check_gpc_undefined(params, "qr_code")
-        verify = check_gpc_undefined(params, "verify")
-        spider_time = check_gpc_undefined(params, "spider_time")
+        last_publish_time = check_gpc_undefined(params, "last_publish_time")
+        last_spider_time = check_gpc_undefined(params, "last_spider_time")
+        is_zombie = check_gpc_undefined(params, "is_zombie", 0)
 
-        wa = WechatAccount(field_biz=biz, account=account, head_url=head_url, summary=summary, qr_code=qr_code, verify=verify, spider_time=spider_time)
+        wa = WechatAccountTask(field_biz=biz, account=account, summary=summary, last_publish_time=last_publish_time, last_spider_time=last_spider_time, is_zombie=is_zombie)
         wa.save()
         return JsonResponse({"code": 200, "status": True, "message": "Insert success."})
 
@@ -82,9 +81,9 @@ class WechatAccountCountView(View):
             account = request.GET['account']
 
         if type:
-            count = WechatAccount.objects.filter(account__contains=account).using("wechat").count()
+            count = WechatAccountTask.objects.filter(account__contains=account).using("lmonitor").count()
         else:
-            count = WechatAccount.objects.all().using("wechat").count()
+            count = WechatAccountTask.objects.all().using("lmonitor").count()
         return JsonResponse({"code": 200, "status": True, "total": count})
 
 
@@ -97,7 +96,7 @@ class WechatAccountDetailsView(View):
     @login_level4_required
     def get(request, account_id):
 
-        wa = WechatAccount.objects.filter(id=account_id).using("wechat").values()
+        wa = WechatAccountTask.objects.filter(id=account_id).using("lmonitor").values()
 
         return JsonResponse({"code": 200, "status": True, "message": list(wa)})
 
@@ -106,24 +105,22 @@ class WechatAccountDetailsView(View):
     def post(request, account_id):
         params = json.loads(request.body)
 
-        wa = WechatAccount.objects.filter(id=account_id).using("wechat").first()
+        wa = WechatAccountTask.objects.filter(id=account_id).using("lmonitor").first()
 
         biz = check_gpc_undefined(params, "biz")
         account = check_gpc_undefined(params, "account")
-        head_url = check_gpc_undefined(params, "head_url")
         summary = check_gpc_undefined(params, "summary")
-        qr_code = check_gpc_undefined(params, "qr_code")
-        verify = check_gpc_undefined(params, "verify")
-        spider_time = check_gpc_undefined(params, "spider_time")
+        last_publish_time = check_gpc_undefined(params, "last_publish_time")
+        last_spider_time = check_gpc_undefined(params, "last_spider_time")
+        is_zombie = check_gpc_undefined(params, "is_zombie", 0)
 
         if wa:
             wa.field_biz = biz
             wa.account = account
-            wa.head_url = head_url
             wa.summary = summary
-            wa.qr_code = qr_code
-            wa.verify = verify
-            wa.spider_time = spider_time
+            wa.last_publish_time = last_publish_time
+            wa.last_spider_time = last_spider_time
+            wa.is_zombie = is_zombie
             wa.save()
 
             return JsonResponse({"code": 200, "status": True, "message": "update successful"})
@@ -131,9 +128,9 @@ class WechatAccountDetailsView(View):
             return JsonResponse({"code": 404, "status": False, "message": "Wechat Account not found"})
 
 
-class WechatAccountTaskListView(View):
+class MonitorTaskListView(View):
     """
-        公众号扫描任务列表
+        监控任务列表
     """
 
     @staticmethod
@@ -141,7 +138,7 @@ class WechatAccountTaskListView(View):
     def get(request):
         size = 10
         page = 1
-        biz = ""
+        name = ""
 
         if "page" in request.GET:
             page = int(request.GET['page'])
@@ -149,81 +146,96 @@ class WechatAccountTaskListView(View):
         if "size" in request.GET:
             size = int(request.GET['size'])
 
-        if "biz" in request.GET:
-            biz = request.GET['biz'].strip()
+        if "name" in request.GET:
+            name = request.GET['name'].strip()
 
-        if biz:
-            wats = WechatAccountTask.objects.filter(field_biz__contains=biz).using("wechat").values()[::-1][(page - 1) * size:page * size]
+        if name:
+            mts = MonitorTask.objects.filter(name__contains=name).using("lmonitor").values()[::-1][(page - 1) * size:page * size]
         else:
-            wats = WechatAccountTask.objects.all().using("wechat").values()[::-1][(page - 1) * size:page * size]
-        count = len(wats)
+            mts = MonitorTask.objects.all().using("lmonitor").values()[::-1][(page - 1) * size:page * size]
+        count = len(mts)
 
-        return JsonResponse({"code": 200, "status": True, "message": list(wats), "total": count})
+        return JsonResponse({"code": 200, "status": True, "message": list(mts), "total": count})
 
     @staticmethod
     @login_level4_required
     def post(request):
         params = json.loads(request.body)
 
-        biz = check_gpc_undefined(params, "biz")
-        is_zombie = check_gpc_undefined(params, "is_zombie", 0)
+        name = check_gpc_undefined(params, "name")
+        target = check_gpc_undefined(params, "target")
+        mtype = check_gpc_undefined(params, "type")
+        last_scan_time = check_gpc_undefined(params, "last_scan_time")
+        flag = check_gpc_undefined(params, "flag")
+        wait_time = check_gpc_undefined(params, "wait_time")
+        is_active = check_gpc_undefined(params, "is_active", 0)
 
-        wat = WechatAccountTask(field_biz=biz, is_zombie=is_zombie)
-        wat.save()
+        mt = MonitorTask(name=name, target=target, type=mtype, last_scan_time=last_scan_time, flag=flag, wait_time=wait_time, is_active=is_active)
+        mt.save()
         return JsonResponse({"code": 200, "status": True, "message": "Insert success."})
 
 
-class WechatAccountTaskCountView(View):
+class MonitorTaskCountView(View):
     """
-        公众号任务列表
+        监控任务统计
     """
 
     @staticmethod
     @login_level4_required
     def get(request):
-        biz = ""
+        name = ""
 
-        if "biz" in request.GET:
-            biz = request.GET['biz']
+        if "name" in request.GET:
+            name = request.GET['name']
 
         if type:
-            count = WechatAccountTask.objects.filter(field_biz__contains=biz).using("wechat").count()
+            count = MonitorTask.objects.filter(name_contains=name).using("lmonitor").count()
         else:
-            count = WechatAccountTask.objects.all().using("wechat").count()
+            count = MonitorTask.objects.all().using("lmonitor").count()
         return JsonResponse({"code": 200, "status": True, "total": count})
 
 
-class WechatAccountTaskDetailsView(View):
+class MonitorTaskDetailsView(View):
     """
-        公众号任务详情
+        监控任务详情
     """
 
     @staticmethod
     @login_level4_required
     def get(request, task_id):
 
-        wat = WechatAccountTask.objects.filter(id=task_id).using("wechat").values()
+        mt = MonitorTask.objects.filter(id=task_id).using("lmonitor").values()
 
-        return JsonResponse({"code": 200, "status": True, "message": list(wat)})
+        return JsonResponse({"code": 200, "status": True, "message": list(mt)})
 
     @staticmethod
     @login_level4_required
     def post(request, task_id):
         params = json.loads(request.body)
 
-        wat = WechatAccountTask.objects.filter(id=task_id).using("wechat").first()
+        mt = MonitorTask.objects.filter(id=task_id).using("lmonitor").first()
 
-        biz = check_gpc_undefined(params, "biz")
-        is_zombie = check_gpc_undefined(params, "is_zombie", 0)
+        name = check_gpc_undefined(params, "name")
+        target = check_gpc_undefined(params, "target")
+        mtype = check_gpc_undefined(params, "type")
+        last_scan_time = check_gpc_undefined(params, "last_scan_time")
+        flag = check_gpc_undefined(params, "flag")
+        wait_time = check_gpc_undefined(params, "wait_time")
+        is_active = check_gpc_undefined(params, "is_active", 0)
 
-        if wat:
-            wat.field_biz = biz
-            wat.is_zombie = is_zombie
-            wat.save()
+        if mt:
+            mt.name = name
+            mt.target = target
+            mt.mtype = mtype
+            mt.last_scan_time = last_scan_time
+            mt.flag = flag
+            mt.wait_time = wait_time
+            mt.is_active = is_active
+            mt.save()
 
             return JsonResponse({"code": 200, "status": True, "message": "update successful"})
         else:
-            return JsonResponse({"code": 404, "status": False, "message": "Wechat Account Task not found"})
+            return JsonResponse({"code": 404, "status": False, "message": "Wechat Account not found"})
 
 
 class WechatArticleListView(View):
@@ -248,9 +260,9 @@ class WechatArticleListView(View):
             title = request.GET['title'].strip()
 
         if title:
-            warts = WechatArticle.objects.filter(title__contains=title).using("wechat").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
+            warts = WechatArticle.objects.filter(title__contains=title).using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
         else:
-            warts = WechatArticle.objects.all().using("wechat").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
+            warts = WechatArticle.objects.all().using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
         count = len(warts)
 
         return JsonResponse({"code": 200, "status": True, "message": list(warts), "total": count})
@@ -268,17 +280,15 @@ class WechatArticleListView(View):
         biz = check_gpc_undefined(params, "biz")
         digest = check_gpc_undefined(params, "digest")
         cover = check_gpc_undefined(params, "cover")
-        pics_url = check_gpc_undefined(params, "pics_url")
         content_html = check_gpc_undefined(params, "content_html")
         source_url = check_gpc_undefined(params, "source_url")
-        comment_id = check_gpc_undefined(params, "comment_id")
         sn = check_gpc_undefined(params, "sn")
-        spider_time = check_gpc_undefined(params, "spider_time")
+        state = check_gpc_undefined(params, "state")
 
         wart = WechatArticle(field_biz=biz, account=account, title=title, url=url, author=author,
-                             publish_time=publish_time, digest=digest, cover=cover, pics_url=pics_url,
-                             content_html=content_html, source_url=source_url, comment_id=comment_id,
-                             sn=sn, spider_time=spider_time)
+                             publish_time=publish_time, digest=digest, cover=cover,
+                             content_html=content_html, source_url=source_url,
+                             sn=sn, state=state)
         wart.save()
         return JsonResponse({"code": 200, "status": True, "message": "Insert success."})
 
@@ -297,9 +307,9 @@ class WechatArticleCountView(View):
             title = request.GET['title']
 
         if title:
-            count = WechatArticle.objects.filter(title__contains=title).using("wechat").count()
+            count = WechatArticle.objects.filter(title__contains=title).using("lmonitor").count()
         else:
-            count = WechatArticle.objects.all().using("wechat").count()
+            count = WechatArticle.objects.all().using("lmonitor").count()
         return JsonResponse({"code": 200, "status": True, "total": count})
 
 
@@ -312,7 +322,7 @@ class WechatArticleDetailsView(View):
     @login_level4_required
     def get(request, art_id):
 
-        wart = WechatArticle.objects.filter(id=art_id).using("wechat").values()
+        wart = WechatArticle.objects.filter(id=art_id).using("lmonitor").values()
 
         return JsonResponse({"code": 200, "status": True, "message": list(wart)})
 
@@ -321,7 +331,7 @@ class WechatArticleDetailsView(View):
     def post(request, art_id):
         params = json.loads(request.body)
 
-        wart = WechatArticle.objects.filter(id=art_id).using("wechat").first()
+        wart = WechatArticle.objects.filter(id=art_id).using("lmonitor").first()
 
         account = check_gpc_undefined(params, "account")
         title = check_gpc_undefined(params, "title")
@@ -331,12 +341,10 @@ class WechatArticleDetailsView(View):
         biz = check_gpc_undefined(params, "biz")
         digest = check_gpc_undefined(params, "digest")
         cover = check_gpc_undefined(params, "cover")
-        pics_url = check_gpc_undefined(params, "pics_url")
         content_html = check_gpc_undefined(params, "content_html")
         source_url = check_gpc_undefined(params, "source_url")
-        comment_id = check_gpc_undefined(params, "comment_id")
         sn = check_gpc_undefined(params, "sn")
-        spider_time = check_gpc_undefined(params, "spider_time")
+        state = check_gpc_undefined(params, "state")
 
         if wart:
             wart.field_biz = biz
@@ -347,12 +355,10 @@ class WechatArticleDetailsView(View):
             wart.publish_time = publish_time
             wart.digest = digest
             wart.cover = cover
-            wart.pics_url = pics_url
             wart.content_html = content_html
             wart.source_url = source_url
-            wart.comment_id = comment_id
             wart.sn = sn
-            wart.spider_time = spider_time
+            wart.state = state
             wart.save()
 
             return JsonResponse({"code": 200, "status": True, "message": "update successful"})
@@ -360,7 +366,7 @@ class WechatArticleDetailsView(View):
             return JsonResponse({"code": 404, "status": False, "message": "Wechat Article Task not found"})
 
 
-class WechatProfileListView(View):
+class TargetAuthListView(View):
     """
         爬虫配置
     """
@@ -377,9 +383,9 @@ class WechatProfileListView(View):
         if "size" in request.GET:
             size = int(request.GET['size'])
 
-        wps = WechatProfile.objects.all().using("wechat").values()[::-1][(page - 1) * size:page * size]
+        tas = TargetAuth.objects.all().using("lmonitor").values()[::-1][(page - 1) * size:page * size]
 
-        return JsonResponse({"code": 200, "status": True, "message": list(wps)})
+        return JsonResponse({"code": 200, "status": True, "message": list(tas)})
 
     @staticmethod
     @login_level4_required
@@ -389,12 +395,12 @@ class WechatProfileListView(View):
         profile_name = check_gpc_undefined(params, "profile_name")
         value = check_gpc_undefined(params, "value")
 
-        wps = WechatProfile(profile_name=profile_name, value=value)
-        wps.save()
+        tas = TargetAuth(profile_name=profile_name, value=value)
+        tas.save()
         return JsonResponse({"code": 200, "status": True, "message": "Insert success."})
 
 
-class WechatProfileDetailsView(View):
+class TargetAuthDetailsView(View):
     """
         爬虫配置详情
     """
@@ -403,24 +409,28 @@ class WechatProfileDetailsView(View):
     @login_level4_required
     def get(request, pro_id):
 
-        wps = WechatProfile.objects.filter(id=pro_id).using("wechat").values()
+        tas = TargetAuth.objects.filter(id=pro_id).using("lmonitor").values()
 
-        return JsonResponse({"code": 200, "status": True, "message": list(wps)})
+        return JsonResponse({"code": 200, "status": True, "message": list(tas)})
 
     @staticmethod
     @login_level4_required
-    def post(request, pro_id):
+    def post(request, auth_id):
         params = json.loads(request.body)
 
-        wp = WechatProfile.objects.filter(id=pro_id).using("wechat").first()
+        ta = TargetAuth.objects.filter(id=auth_id).using("lmonitor").first()
 
-        profile_name = check_gpc_undefined(params, "profile_name")
-        value = check_gpc_undefined(params, "value")
+        domain = check_gpc_undefined(params, "domain")
+        cookie = check_gpc_undefined(params, "cookie")
+        is_login = check_gpc_undefined(params, "is_login")
+        ext = check_gpc_undefined(params, "ext")
 
-        if wp:
-            wp.profile_name = profile_name
-            wp.value = value
-            wp.save()
+        if ta:
+            ta.profile_name = domain
+            ta.cookie = cookie
+            ta.is_login = is_login
+            ta.ext = ext
+            ta.save()
 
             return JsonResponse({"code": 200, "status": True, "message": "update successful"})
         else:

@@ -25,19 +25,19 @@ urlpatterns = [
     path("wechat/count", csrf_exempt(wechat.WechatAccountCountView.as_view()), name="wechat_count"),
     path("wechat/<int:account_id>", csrf_exempt(wechat.WechatAccountDetailsView.as_view()), name="wechat_detail"),
 
-    path("wechat/task", csrf_exempt(wechat.WechatAccountTaskListView.as_view()), name="wechat_task"),
-    path("wechat/task/count", csrf_exempt(wechat.WechatAccountTaskCountView.as_view()),
-         name="wechat_task_count"),
-    path("wechat/task/<int:task_id>", csrf_exempt(wechat.WechatAccountTaskDetailsView.as_view()),
-         name="wechat_task_detail"),
-
     path("wechat/article", csrf_exempt(wechat.WechatArticleListView.as_view()), name="wechat_article"),
     path("wechat/article/count", csrf_exempt(wechat.WechatArticleCountView.as_view()),
          name="wechat_article_count"),
     path("wechat/article/<int:art_id>", csrf_exempt(wechat.WechatArticleDetailsView.as_view()),
          name="wechat_article_detail"),
 
-    path("wechat/profile", csrf_exempt(wechat.WechatProfileListView.as_view()), name="wechat_profile"),
-    path("wechat/profile/<int:pro_id>", csrf_exempt(wechat.WechatProfileDetailsView.as_view()),
+    path("monitor/task", csrf_exempt(wechat.MonitorTaskListView.as_view()), name="wechat_task"),
+    path("monitor/task/count", csrf_exempt(wechat.MonitorTaskCountView.as_view()),
+         name="wechat_task_count"),
+    path("monitor/task/<int:task_id>", csrf_exempt(wechat.MonitorTaskDetailsView.as_view()),
+         name="wechat_task_detail"),
+
+    path("monitor/auth", csrf_exempt(wechat.TargetAuthListView.as_view()), name="wechat_profile"),
+    path("monitor/auth/<int:auth_id>", csrf_exempt(wechat.TargetAuthDetailsView.as_view()),
          name="wechat_profile_detail"),
 ]
