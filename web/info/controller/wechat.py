@@ -12,6 +12,8 @@
 from __future__ import unicode_literals
 
 import json
+import pytz
+import datetime
 
 from django.views import View
 from django.http import HttpResponse, JsonResponse
@@ -263,6 +265,11 @@ class WechatArticleListView(View):
             warts = WechatArticle.objects.filter(title__contains=title).using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
         else:
             warts = WechatArticle.objects.all().using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
+
+        for wart in warts:
+            local_tz = pytz.timezone('Asia/Shanghai')
+            wart['publish_time'] = wart['publish_time'].replace(tzinfo=local_tz).strftime("%Y-%m-%d %H:%M:%S")
+
         count = len(warts)
 
         return JsonResponse({"code": 200, "status": True, "message": list(warts), "total": count})
