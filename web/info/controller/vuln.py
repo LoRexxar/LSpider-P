@@ -148,6 +148,11 @@ class VulnDataListView(View):
             vds = VulnData.objects.all().using("lmonitor").values()[::-1][(page - 1) * size:page * size]
         count = len(vds)
 
+        for vd in vds:
+            vd.description = ""
+            vd.solutions = ""
+            vd.reference = ""
+
         return JsonResponse({"code": 200, "status": True, "message": list(vds), "total": count})
 
     @staticmethod
