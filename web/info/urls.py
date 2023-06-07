@@ -12,7 +12,7 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
 from web.info import views
-from web.info.controller import wechat
+from web.info.controller import wechat, vuln
 
 
 app_name = "info"
@@ -40,4 +40,16 @@ urlpatterns = [
     path("monitor/auth", csrf_exempt(wechat.TargetAuthListView.as_view()), name="wechat_profile"),
     path("monitor/auth/<int:auth_id>", csrf_exempt(wechat.TargetAuthDetailsView.as_view()),
          name="wechat_profile_detail"),
+
+    path("vuln/task", csrf_exempt(vuln.VulnMonitorTaskListView.as_view()), name="vuln_task"),
+    path("vuln/task/count", csrf_exempt(vuln.VulnMonitorTaskCountView.as_view()),
+         name="vuln_task_count"),
+    path("vuln/task/<int:task_id>", csrf_exempt(vuln.VulnMonitorTaskDetailsView.as_view()),
+         name="vuln_task_detail"),
+
+    path("vuln/", csrf_exempt(vuln.VulnDataListView.as_view()), name="vuln_list"),
+    path("vuln/count", csrf_exempt(vuln.VulnDataCountView.as_view()),
+         name="vuln_task_count"),
+    path("vuln/<int:vid>", csrf_exempt(vuln.VulnDataDetailsView.as_view()),
+         name="vuln_detail"),
 ]

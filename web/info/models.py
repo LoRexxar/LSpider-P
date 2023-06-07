@@ -66,3 +66,39 @@ class WechatArticle(models.Model):
     class Meta:
         managed = False
         db_table = 'botend_wechatarticle'
+
+
+class VulnMonitorTask(models.Model):
+    task_name = models.CharField(max_length=255)
+    target = models.CharField(max_length=1000, null=True)
+    last_spider_time = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        managed = False
+        db_table = 'botend_vulnmonitortask'
+
+
+class VulnData(models.Model):
+    sid = models.CharField(max_length=200, null=True)
+    cveid = models.CharField(max_length=200, null=True)
+    title = models.CharField(max_length=500)
+    type = models.CharField(max_length=100, null=True)
+    score = models.CharField(max_length=10, default="0")
+    severity = models.IntegerField(default=0)
+    publish_time = models.DateTimeField()
+    description = models.TextField(null=True)
+    solutions = models.TextField(null=True)
+    link = models.CharField(max_length=1000, null=True)
+    tag = models.CharField(max_length=200, null=True)
+    reference = models.CharField(max_length=1000, null=True)
+    source = models.CharField(max_length=1000, null=True)
+    state = models.IntegerField(default=0)
+    is_poc = models.BooleanField(default=False)
+    is_exp = models.BooleanField(default=False)
+    is_verify = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        managed = False
+        db_table = 'botend_vulndata'
