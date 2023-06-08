@@ -246,7 +246,7 @@ class WechatArticleListView(View):
     """
 
     @staticmethod
-    @login_level4_required
+    @login_level1_required
     def get(request):
         size = 10
         page = 1
@@ -306,7 +306,7 @@ class WechatArticleCountView(View):
     """
 
     @staticmethod
-    @login_level4_required
+    @login_level1_required
     def get(request):
         title = ""
 
@@ -326,7 +326,7 @@ class WechatArticleDetailsView(View):
     """
 
     @staticmethod
-    @login_level4_required
+    @login_level2_required
     def get(request, art_id):
 
         wart = WechatArticle.objects.filter(id=art_id).using("lmonitor").values()

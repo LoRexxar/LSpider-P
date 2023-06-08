@@ -87,17 +87,17 @@ class VulnData(models.Model):
     score = models.CharField(max_length=10, default="0")
     severity = models.IntegerField(default=0)
     publish_time = models.DateTimeField()
+    link = models.CharField(max_length=1000, null=True)
     description = models.TextField(null=True)
     solutions = models.TextField(null=True)
-    link = models.CharField(max_length=1000, null=True)
-    tag = models.CharField(max_length=200, null=True)
-    reference = models.CharField(max_length=1000, null=True)
     source = models.CharField(max_length=1000, null=True)
-    state = models.IntegerField(default=0)
+    reference = models.CharField(max_length=1000, null=True)
+    tag = models.CharField(max_length=200, null=True)
     is_poc = models.BooleanField(default=False)
     is_exp = models.BooleanField(default=False)
     is_verify = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    state = models.IntegerField(default=0)
 
     class Meta:
         managed = False

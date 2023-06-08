@@ -177,12 +177,12 @@ class VulnDataListView(View):
         is_exp = check_gpc_undefined(params, "is_exp", 1)
         is_verify = check_gpc_undefined(params, "is_verify", 1)
         is_active = check_gpc_undefined(params, "is_active", 1)
-        state = check_gpc_undefined(params, "state", 1)
+        state = check_gpc_undefined(params, "state", 0)
 
         vd = VulnData(sid=sid, cveid=cveid, title=title, type=vtype, score=score, severity=severity,
                       publish_time=publish_time, description=description, solutions=solutions, link=link,
-                      tag=tag, source=source, reference=reference, is_poc=is_poc, is_exp=is_exp, is_verify=is_verify,
-                      is_active=is_active, state=state)
+                      tag=tag, source=source, reference=reference, state=state, is_poc=is_poc, is_exp=is_exp,
+                      is_verify=is_verify, is_active=is_active)
         vd.save()
         return JsonResponse({"code": 200, "status": True, "message": "Insert success."})
 
@@ -240,11 +240,11 @@ class VulnDataDetailsView(View):
         tag = check_gpc_undefined(params, "target")
         source = check_gpc_undefined(params, "target")
         reference = check_gpc_undefined(params, "target")
+        state = check_gpc_undefined(params, "state", 0)
         is_poc = check_gpc_undefined(params, "is_poc", 1)
         is_exp = check_gpc_undefined(params, "is_exp", 1)
         is_verify = check_gpc_undefined(params, "is_verify", 1)
         is_active = check_gpc_undefined(params, "is_active", 1)
-        state = check_gpc_undefined(params, "state", 1)
 
         if vd:
             vd.sid = sid
