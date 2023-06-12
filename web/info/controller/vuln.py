@@ -93,9 +93,9 @@ class VulnMonitorTaskDetailsView(View):
 
     @staticmethod
     @login_level4_required
-    def get(request, account_id):
+    def get(request, task_id):
 
-        vmts = VulnMonitorTask.objects.filter(id=account_id).using("lmonitor").values()
+        vmts = VulnMonitorTask.objects.filter(id=task_id).using("lmonitor").values()
 
         return JsonResponse({"code": 200, "status": True, "message": list(vmts)})
 
@@ -143,15 +143,18 @@ class VulnDataListView(View):
             title = request.GET['title'].strip()
 
         if title:
-            vds = VulnData.objects.filter(title__contains=title).using("lmonitor").values()[::-1][(page - 1) * size:page * size]
+            vds = VulnData.objects.filter(title__contains=title).using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
         else:
             vds = VulnData.objects.all().using("lmonitor").values()[::-1][(page - 1) * size:page * size]
         count = len(vds)
 
         for vd in vds:
-            vd.description = ""
-            vd.solutions = ""
-            vd.reference = ""
+            vd['description'] = ""
+            vd['solutions'] = ""
+            vd['reference'] = ""
+
+            local_tz = pytz.timezone('Asia/Shanghai')
+            vd['publish_time'] = vd['publish_time'].replace(tzinfo=local_tz).strftime("%Y-%m-%d %H:%M:%S")
 
         return JsonResponse({"code": 200, "status": True, "message": list(vds), "total": count})
 
@@ -166,13 +169,13 @@ class VulnDataListView(View):
         vtype = check_gpc_undefined(params, "type")
         score = check_gpc_undefined(params, "score", 0)
         severity = check_gpc_undefined(params, "severity", 0)
-        publish_time = check_gpc_undefined(params, "target")
-        description = check_gpc_undefined(params, "target")
-        solutions = check_gpc_undefined(params, "target")
-        link = check_gpc_undefined(params, "target")
-        tag = check_gpc_undefined(params, "target")
-        source = check_gpc_undefined(params, "target")
-        reference = check_gpc_undefined(params, "target")
+        publish_time = check_gpc_undefined(params, "publish_time")
+        description = check_gpc_undefined(params, "description")
+        solutions = check_gpc_undefined(params, "solutions")
+        link = check_gpc_undefined(params, "link")
+        tag = check_gpc_undefined(params, "tag")
+        source = check_gpc_undefined(params, "source")
+        reference = check_gpc_undefined(params, "reference")
         is_poc = check_gpc_undefined(params, "is_poc", 1)
         is_exp = check_gpc_undefined(params, "is_exp", 1)
         is_verify = check_gpc_undefined(params, "is_verify", 1)
@@ -233,18 +236,18 @@ class VulnDataDetailsView(View):
         vtype = check_gpc_undefined(params, "type")
         score = check_gpc_undefined(params, "score", 0)
         severity = check_gpc_undefined(params, "severity", 0)
-        publish_time = check_gpc_undefined(params, "target")
-        description = check_gpc_undefined(params, "target")
-        solutions = check_gpc_undefined(params, "target")
-        link = check_gpc_undefined(params, "target")
-        tag = check_gpc_undefined(params, "target")
-        source = check_gpc_undefined(params, "target")
-        reference = check_gpc_undefined(params, "target")
-        state = check_gpc_undefined(params, "state", 0)
+        publish_time = check_gpc_undefined(params, "publish_time")
+        description = check_gpc_undefined(params, "description")
+        solutions = check_gpc_undefined(params, "solutions")
+        link = check_gpc_undefined(params, "link")
+        tag = check_gpc_undefined(params, "tag")
+        source = check_gpc_undefined(params, "source")
+        reference = check_gpc_undefined(params, "reference")
         is_poc = check_gpc_undefined(params, "is_poc", 1)
         is_exp = check_gpc_undefined(params, "is_exp", 1)
         is_verify = check_gpc_undefined(params, "is_verify", 1)
         is_active = check_gpc_undefined(params, "is_active", 1)
+        state = check_gpc_undefined(params, "state", 0)
 
         if vd:
             vd.sid = sid
