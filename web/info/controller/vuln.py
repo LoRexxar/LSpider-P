@@ -140,10 +140,10 @@ class VulnDataListView(View):
             size = int(request.GET['size'])
 
         if "title" in request.GET:
-            title = request.GET['title'].strip()
+            title = request.GET['title'].strip().lower()
 
         if title:
-            vds = VulnData.objects.filter(title__contains=title).using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
+            vds = VulnData.objects.filter(title__icontains=title).using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
         else:
             vds = VulnData.objects.all().using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
         count = len(vds)
