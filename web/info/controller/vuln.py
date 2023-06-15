@@ -145,7 +145,7 @@ class VulnDataListView(View):
         if title:
             vds = VulnData.objects.filter(title__contains=title).using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
         else:
-            vds = VulnData.objects.all().using("lmonitor").values()[::-1][(page - 1) * size:page * size]
+            vds = VulnData.objects.all().using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
         count = len(vds)
 
         for vd in vds:
