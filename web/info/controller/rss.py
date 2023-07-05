@@ -147,9 +147,9 @@ class RssArticleListView(View):
             title = request.GET['title'].strip().lower()
 
         if title:
-            ras = RssArticle.objects.filter(title__icontains=title).using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
+            ras = RssArticle.objects.filter(title__icontains=title, is_active=1).using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
         else:
-            ras = RssArticle.objects.all().using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
+            ras = RssArticle.objects.filter(is_active=1).using("lmonitor").order_by("publish_time").values()[::-1][(page - 1) * size:page * size]
         count = len(ras)
 
         for ra in ras:
