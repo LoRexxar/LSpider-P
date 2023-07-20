@@ -100,6 +100,12 @@ class ProjectDetailsView(View):
         ps_list = list(ps)
 
         pss_list = list(ProjectSource.objects.filter(project_id=project_id, is_active=True).values())
+
+        for pss in pss_list:
+            if pss['type'] == 1:
+                if not pss['content'].startswith("http"):
+                    pss['content'] = "https://" + pss['content']
+
         ps_list[0]['extra'] = pss_list
 
         return JsonResponse({"code": 200, "status": True, "message": ps_list, "total": count})
