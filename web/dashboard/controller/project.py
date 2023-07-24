@@ -9,6 +9,7 @@
 
 '''
 
+from utils.log import logger
 
 from web.dashboard.models import Project, ProjectSource, ProjectAssets, ProjectIps, ProjectVuls, ProjectSubdomain, ProjectAnnouncement
 from web.info.models import RssArticle, RssMonitorTask, WechatArticle, WechatAccountTask
@@ -19,7 +20,9 @@ def check_project_wechat_update():
     检查project对应的公众号更新同步
     :return:
     """
+    logger.info("[init check] LSpider Data check before init.")
     pss = ProjectSource.objects.filter(type=2)
+
     for ps in pss:
         wechat_name = ps.content
         rmt = RssMonitorTask.objects.filter(name=wechat_name).first()

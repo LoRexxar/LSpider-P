@@ -23,7 +23,6 @@ def traverse_task_list():
         }
     ]
 
-    logger.info("[init check] LSpider Data check before init.")
     for task in task_list:
         if time.time() % task['time'] < 10:
             task['function']()
