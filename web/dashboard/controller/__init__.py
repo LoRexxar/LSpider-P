@@ -12,7 +12,7 @@
 import time
 from utils.log import logger
 
-from project import check_project_wechat_update
+from web.dashboard.controller.project import check_project_wechat_update
 
 
 def traverse_task_list():
