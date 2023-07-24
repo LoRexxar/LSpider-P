@@ -13,7 +13,7 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
 from web.dashboard import views
-from web.dashboard.controller import project, options, user, logs
+from web.dashboard.interface import project, options, user, logs
 
 
 app_name = "dashboard"
