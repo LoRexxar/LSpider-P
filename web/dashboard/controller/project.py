@@ -25,12 +25,12 @@ def check_project_wechat_update():
 
     for ps in pss:
         wechat_name = ps.content
+
+        # rss check
         rmt = RssMonitorTask.objects.filter(name=wechat_name).using("lmonitor").first()
 
         if rmt:
-            print(wechat_name)
             ras = RssArticle.objects.filter(rss_id=rmt.id).using("lmonitor")
-            print(ras)
 
             for ra in ras:
                 # 读取project source中的所有公众号对应的文章
@@ -39,6 +39,26 @@ def check_project_wechat_update():
                 author = ra.author
                 content = ra.content_html
                 create_time = ra.publish_time
+
+                pa = ProjectAnnouncement.objects.filter(title=title, project_id=ps.id).first()
+                if not pa:
+                    pa2 = ProjectAnnouncement(project_id=ps.id, title=title, author=author,
+                                              content=content, create_time=create_time, is_active=1, link=link,
+                                              )
+                    pa2.save()
+
+        # wechat check
+        wat = WechatAccountTask.objects.filter(account=wechat_name).using("lmonitor").first()
+
+        if wat:
+            was = WechatArticle.objects.filter(account=wechat_name).using("lmonitor")
+
+            for wa in was:
+                title = wa.title
+                link = wa.url
+                author = wa.account
+                content = wa.content_html
+                create_time = wa.publish_time
 
                 pa = ProjectAnnouncement.objects.filter(title=title, project_id=ps.id).first()
                 if not pa:
