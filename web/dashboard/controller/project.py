@@ -28,7 +28,9 @@ def check_project_wechat_update():
         rmt = RssMonitorTask.objects.filter(name=wechat_name).using("lmonitor").first()
 
         if rmt:
+            print(wechat_name)
             ras = RssArticle.objects.filter(rss_id=rmt.id).using("lmonitor")
+            print(ras)
 
             for ra in ras:
                 # 读取project source中的所有公众号对应的文章
