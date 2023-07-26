@@ -24,7 +24,7 @@ def traverse_task_list():
     ]
 
     for task in task_list:
-        if time.time() % task['time'] < 300:
+        if time.time() % task['time'] < 600:
             task['function']()
 
     return True
