@@ -40,9 +40,9 @@ def check_project_wechat_update():
                 content = ra.content_html
                 create_time = ra.publish_time
 
-                pa = ProjectAnnouncement.objects.filter(title=title, project_id=ps.id).first()
+                pa = ProjectAnnouncement.objects.filter(title=title, project_id=ps.project_id).first()
                 if not pa:
-                    pa2 = ProjectAnnouncement(project_id=ps.id, title=title, author=author,
+                    pa2 = ProjectAnnouncement(project_id=ps.project_id, title=title, author=author,
                                               content=content, create_time=create_time, is_active=1, link=link,
                                               )
                     pa2.save()
@@ -60,9 +60,9 @@ def check_project_wechat_update():
                 content = wa.content_html
                 create_time = wa.publish_time
 
-                pa = ProjectAnnouncement.objects.filter(title=title, project_id=ps.id).first()
+                pa = ProjectAnnouncement.objects.filter(title=title, project_id=ps.project_id).first()
                 if not pa:
-                    pa2 = ProjectAnnouncement(project_id=ps.id, title=title, author=author,
+                    pa2 = ProjectAnnouncement(project_id=ps.project_id, title=title, author=author,
                                               content=content, create_time=create_time, is_active=1, link=link,
                                               )
                     pa2.save()
