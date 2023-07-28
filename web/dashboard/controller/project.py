@@ -65,5 +65,6 @@ def check_project_wechat_update():
                     pa2 = ProjectAnnouncement(project_id=ps.project_id, title=title, author=author,
                                               content=content, create_time=create_time, is_active=1, link=link,
                                               )
+                    pa2.create_time = create_time
                     pa2.save()
     return
