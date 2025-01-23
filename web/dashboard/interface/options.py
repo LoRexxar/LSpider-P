@@ -20,6 +20,7 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 
 from web.dashboard.models import VulType
+from web.index.models import ConfigData
 from LSpider.const import *
 
 
@@ -55,3 +56,13 @@ def ProjectVulsSeverity(request):
 
 def ScaVulsSeverity(request):
     return JsonResponse({"code": 200, "status": True, "message": SCA_VULS_SEVERITY})
+
+
+class ConfigDataListView(View):
+
+    @staticmethod
+    def get(request):
+        cds = ConfigData.objects.filter(is_display=True).values()
+        count = len(cds)
+
+        return JsonResponse({"code": 200, "status": True, "message": list(cds), "total": count})

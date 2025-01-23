@@ -20,8 +20,9 @@ from utils.log import logger
 class CrtScan:
     def __init__(self):
         self.req = LReq()
-
         self.url = "https://crt.sh/?q="
+
+        logger.info("[Pre Scan][CrtScan] start Crt.sh scan.")
 
     def query(self, domain, deep=0):
 

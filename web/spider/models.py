@@ -11,6 +11,7 @@ class SubDomainList(models.Model):
     lastscan = models.DateTimeField(auto_now=True)
     is_finished = models.BooleanField(default=False)
     is_emergency = models.BooleanField(default=False)
+    is_assign = models.BooleanField(default=False)
 
 
 URL_TYPE = {
@@ -28,3 +29,10 @@ class UrlTable(models.Model):
 
 class ScanTable(models.Model):
     scantime = models.DateTimeField(auto_now=True)
+
+
+class SubIpList(models.Model):
+    subdomain = models.CharField(max_length=200)
+    ips = models.CharField(max_length=200)
+    ext = models.CharField(max_length=1000, null=True, default="")
+    updatetime = models.DateTimeField(auto_now=True)

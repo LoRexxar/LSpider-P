@@ -13,7 +13,7 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
 from web.dashboard import views
-from web.dashboard.controller import project, options, user, logs
+from web.dashboard.interface import project, options, user, logs
 
 
 app_name = "dashboard"
@@ -59,6 +59,11 @@ urlpatterns = [
     path("project/<int:project_id>/urls/count", csrf_exempt(project.ProjectUrlsListCountView.as_view()),
          name="project_urls_count"),
 
+    # project child table
+    path("projectsource", csrf_exempt(project.ProjectSourceListView.as_view()), name="project_source"),
+    path("projectsource/count", csrf_exempt(project.ProjectSourcesListCountView.as_view()), name="project_source_count"),
+    path("projectsource/<int:source_id>", csrf_exempt(project.ProjectSourcesDetailsView.as_view()), name="project_source_detail"),
+
     # options
     path("options/vultype", csrf_exempt(options.VulTypeListView.as_view()), name="vultype"),
 
@@ -67,6 +72,7 @@ urlpatterns = [
     path("options/projectAssertsSeverity", options.ProjectAssertsSeverity, name="option_project_asserts_severity"),
     path("options/projectVulsSeverity", options.ProjectVulsSeverity, name="option_project_vuls_severity"),
     path("options/scaVulsSeverity", options.ScaVulsSeverity, name="option_sca_severity"),
+    path("options/configDataList", csrf_exempt(options.ConfigDataListView.as_view()), name="option_configdata"),
 
     # users
     path("user", csrf_exempt(user.UserListView.as_view()), name="user"),

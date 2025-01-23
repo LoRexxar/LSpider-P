@@ -21,6 +21,7 @@ PROJECT_ASSERTS_TYPE_LIST = {
     0: "Unknown",
     1: "Web 资产",
     2: "实物类资产",
+    3: "APP类资产",
 }
 
 PROJECT_ASSERTS_SEVERITYS = {

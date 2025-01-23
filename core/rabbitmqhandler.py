@@ -33,10 +33,10 @@ class RabbitmqHandler:
         self.scan_target_channel = self.conn_broker.channel()
         self.emergency_scan_target_channel = self.conn_broker.channel()
 
-        logger.info("[Monitor][INIT] Rabbitmq init success...")
+        logger.debug("[Monitor][INIT] Rabbitmq init success...")
 
     def link(self):
-        logger.info("[Monitor][INIT][Rabbitmq] New Rabbitmq link to {}".format(self.ip))
+        logger.debug("[Monitor][INIT][Rabbitmq] New Rabbitmq link to {}".format(self.ip))
 
         self.credentials = pika.PlainCredentials(self.user, self.password)
         self.connection = pika.ConnectionParameters(host=self.ip, port=self.port, credentials=self.credentials,

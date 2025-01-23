@@ -167,7 +167,7 @@ class LReq:
         logger.info("[LReq] New request by python: {}".format(url))
         cookies = cookies[0] if cookies else ""
 
-        r = self.s.get(url, headers=self.get_header(url, cookies), timeout=3)
+        r = self.s.get(url, headers=self.get_header(url, cookies), timeout=20)
 
         return 1, r.content, ""
 
@@ -183,7 +183,7 @@ class LReq:
         logger.info("[LReq] New request by python: {}".format(url))
         cookies = cookies[0] if cookies else ""
 
-        r = self.s.post(url, data=data, headers=self.get_header(url, cookies), timeout=3)
+        r = self.s.post(url, data=data, headers=self.get_header(url, cookies), timeout=20)
 
         return 1, r.content, ""
 
@@ -195,7 +195,7 @@ class LReq:
         header = self.get_header(url, cookies)
         header['Content-Type'] = 'application/json'
 
-        r = self.s.post(url, data=json.dumps(data), headers=header, timeout=3)
+        r = self.s.post(url, data=json.dumps(data), headers=header, timeout=20)
 
         return 1, r.content, ""
 

@@ -38,6 +38,9 @@ def html_parser(content):
     """
     result_list = []
 
+    if not content:
+        return result_list
+
     try:
         soup = BeautifulSoup(content, "html.parser")
 

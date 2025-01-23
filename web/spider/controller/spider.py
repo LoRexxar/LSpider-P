@@ -22,6 +22,7 @@ from utils.LReq import LReq
 from utils.log import logger, backendLog
 from utils.base import get_new_scan_id, get_now_scan_id
 from utils.base import check_target
+from utils import init_config, set_conig
 
 from core.htmlparser import html_parser
 from core.urlparser import url_parser, checkbanlist
@@ -29,11 +30,11 @@ from core.threadingpool import ThreadPool
 from core.rabbitmqhandler import RabbitmqHandler
 from core.domainauthcheck import check_login_or_get_cookie
 
-from LSpider.settings import LIMIT_DEEP, IS_OPEN_RABBITMQ
+from LSpider.settings import LIMIT_DEEP, IS_OPEN_RABBITMQ, IS_RECORD_AUTH_PAGE, IS_REINSERT_AUTH_PAGE
 from LSpider.settings import IS_OPEN_CHROME_PROXY, CHROME_PROXY
 
 from web.spider.models import UrlTable, SubDomainList
-from web.index.models import ScanTask
+from web.index.models import ScanTask, ConfigData
 
 from web.spider.controller.prescan import PrescanCore
 
@@ -48,6 +49,10 @@ class SpiderCoreBackend:
         self.emergency_target_list = Queue()
         self.threadpool = ThreadPool()
         self.scan_id = get_now_scan_id()
+
+        # 初始化配置
+        init_config()
+        set_conig("NOW_SPIDER_TASKID", self.scan_id)
 
         self.check_task()
         # 获取线程池然后分发信息对象
@@ -90,9 +95,9 @@ class SpiderCoreBackend:
                     time.sleep(3)
 
             # self.threadpool.wait_all_thread()
-            # 60s 检查一次任务以及线程状态
+            # 600s 检查一次任务以及线程状态
             self.check_task()
-            time.sleep(60)
+            time.sleep(600)
 
     def check_task(self):
 
@@ -109,8 +114,16 @@ class SpiderCoreBackend:
             left_tasks = self.target_list.qsize()
             left_emergency_tasks = self.emergency_target_list.qsize()
 
-        logger.info("[Spider Main] now {} targets left.".format(left_tasks))
-        logger.info("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
+        # 每天记录一次数据，其他时候不记录
+        if time.time() % 86400 < 600:
+            logger.info("[Spider Main] now {} targets left.".format(left_tasks))
+            logger.info("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
+        else:
+            logger.debug("[Spider Main] now {} targets left.".format(left_tasks))
+            logger.debug("[Spider Main] Emergency Task left {} targets.".format(left_emergency_tasks))
+
+            set_conig("LEFT_SPIDER_COUNT", left_tasks)
+            set_conig("EMERGENCY_LEFT_SPIDER_COUNT", left_emergency_tasks)
 
         if left_tasks > 100:
             logger.debug("[Spider Main] Left Tasks more than 100. pause to start new task.")
@@ -122,6 +135,7 @@ class SpiderCoreBackend:
         if tasklist:
             # 获得新任务的scan_id
             self.scan_id = get_new_scan_id()
+            set_conig("NOW_SPIDER_TASKID", self.scan_id)
 
             t = threading.Thread(target=self.init_scan)
             t.start()
@@ -130,14 +144,14 @@ class SpiderCoreBackend:
         # 如果队列为空，那么直接跳出
         if IS_OPEN_RABBITMQ:
             if not self.rabbitmq_handler.get_scan_ready_count():
-                logger.info("[Spider Core] Spider Target Queue is empty.")
+                logger.debug("[Spider Core] Spider Target Queue is empty.")
                 return
 
         if not IS_OPEN_RABBITMQ and self.target_list.empty():
-            logger.info("[Spider Core] Spider Target Queue is empty.")
+            logger.debug("[Spider Core] Spider Target Queue is empty.")
             return
 
-        logger.info("[Spider Main] Spider id {} Start...".format(self.scan_id))
+        logger.debug("[Spider Main] Now Spider id {} ...".format(self.scan_id))
 
     def init_scan(self):
 
@@ -218,7 +232,8 @@ class SpiderCoreBackend:
                             {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}))
 
                     else:
-                        self.rabbitmq_handler.new_scan_target(json.dumps({'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}), weight=1)
+                        self.rabbitmq_handler.new_scan_target(json.dumps(
+                            {'url': "http://"+target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}), weight=1)
                         self.rabbitmq_handler.new_scan_target(json.dumps(
                             {'url': "https://" + target, 'type': 'link', 'cookies': target_cookies, 'deep': 0}), weight=1)
                 else:
@@ -428,29 +443,30 @@ class SpiderCore:
             title = ""
 
             # 发起对目标的请求
-            if target['type'] == 'link':
-                code, content, title = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
-
             if target['type'] == 'js':
                 code, content, title = self.req.get(target['url'], 'Resp', 0, target['cookies'])
+            else:
+                code, content, title = self.req.get(target['url'], 'RespByChrome', 0, target['cookies'])
 
             if code == -1:
                 return
 
             # 如果这个页面需要登录，那么把链接塞入加急队列之后等待对应的鉴权被设置
-            if code == 2:
+            # 加入限制允许暂时关闭这个功能
+            if IS_RECORD_AUTH_PAGE and code == 2:
                 # 代表这个页面需要登录
                 backend_cookies, auth_status = check_login_or_get_cookie(target['url'], title)
 
-                # 任务塞到加急队列中
-                new_target = target
-                new_target['cookies'] = backend_cookies
+                if IS_REINSERT_AUTH_PAGE:
+                    # 任务塞到加急队列中
+                    new_target = target
+                    new_target['cookies'] = backend_cookies
 
-                # 如果获取到鉴权，那么任务放回主线程并增加权重
-                if backend_cookies:
-                    self.rabbitmq_handler.new_scan_target(json.dumps(new_target), weight=5)
-                else:
-                    self.rabbitmq_handler.new_emergency_scan_target(json.dumps(new_target))
+                    # 如果获取到鉴权，那么任务放回主线程并增加权重
+                    if backend_cookies:
+                        self.rabbitmq_handler.new_scan_target(json.dumps(new_target), weight=5)
+                    else:
+                        self.rabbitmq_handler.new_emergency_scan_target(json.dumps(new_target))
 
             else:
                 backend_cookies = target['cookies']
@@ -483,8 +499,6 @@ class SpiderCore:
                     self.rabbitmq_handler.new_scan_target(json.dumps(target), weight=task_weight+1)
                 else:
                     self.target_list.put(target)
-
-                # self.target_list.put(target)
 
         except KeyboardInterrupt:
             logger.error("[Scan] Stop Scaning.")

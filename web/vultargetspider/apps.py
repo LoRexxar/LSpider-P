@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class VultargetspiderConfig(AppConfig):
-    name = 'vultargetspider'
+    name = 'web.vultargetspider'

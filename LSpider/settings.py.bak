@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'web.index',
     'web.spider',
     'web.vultargetspider',
+    'web.dashboard',
+    'web.sca',
+    'web.info'
 ]
 
 MIDDLEWARE = [
@@ -83,6 +86,22 @@ DATABASES = {
         'NAME': 'LSpider',
         'USER': 'root',
         'PASSWORD': 'lspider123!@#',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': 'SET default_storage_engine=INNODB;SET NAMES utf8mb4',
+            'charset': 'utf8mb4',
+        },
+        'TEST': {
+            'CHARSET': 'utf8',
+            'COLLATION': 'utf8_general_ci',
+        },
+    },
+    'wechat': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'wechat',
+        'USER': 'root',
+        'PASSWORD': '',
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {
@@ -189,6 +208,12 @@ RABBITMQ_VHOST = ""
 # wheather open rabbitmq
 IS_OPEN_RABBITMQ = True
 
+# spider profile
+# 是否关闭；鉴权页面判断，如果true则记录鉴权页面并挂起到紧急线程
+IS_RECORD_AUTH_PAGE = True
+# 是否将任务挂起到紧急线程
+IS_REINSERT_AUTH_PAGE = True
+
 # proxy for chrome headless
 IS_OPEN_CHROME_PROXY = False
 CHROME_PROXY = '127.0.0.1:7777'
@@ -227,3 +252,6 @@ IS_TEST_ENVIRONMENT = False
 
 # for register
 IS_OPEN_REGISTER = True
+
+# for ksubdomain
+KSUBDOMAIN_PATH = ""
