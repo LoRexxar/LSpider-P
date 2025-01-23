@@ -29,7 +29,7 @@ class VulnMonitorTaskListView(View):
     """
 
     @staticmethod
-    @login_level4_required
+    @login_level2_required
     def get(request):
         size = 10
         page = 1
@@ -72,7 +72,7 @@ class VulnMonitorTaskCountView(View):
     """
 
     @staticmethod
-    @login_level4_required
+    @login_level2_required
     def get(request):
         task_name = ""
 
@@ -92,7 +92,7 @@ class VulnMonitorTaskDetailsView(View):
     """
 
     @staticmethod
-    @login_level4_required
+    @login_level2_required
     def get(request, task_id):
 
         vmts = VulnMonitorTask.objects.filter(id=task_id).using("lmonitor").values()

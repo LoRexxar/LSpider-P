@@ -30,7 +30,7 @@ class RssMonitorTaskListView(View):
     """
 
     @staticmethod
-    @login_level4_required
+    @login_level1_required
     def get(request):
         size = 10
         page = 1
@@ -74,7 +74,7 @@ class RssMonitorTaskCountView(View):
     """
 
     @staticmethod
-    @login_level4_required
+    @login_level1_required
     def get(request):
         name = ""
 
@@ -94,7 +94,7 @@ class RssMonitorTaskDetailsView(View):
     """
 
     @staticmethod
-    @login_level4_required
+    @login_level1_required
     def get(request, task_id):
 
         rmts = RssMonitorTask.objects.filter(id=task_id).using("lmonitor").values()
@@ -131,7 +131,7 @@ class RssArticleListView(View):
     """
 
     @staticmethod
-    @login_level2_required
+    @login_level1_required
     def get(request):
         size = 10
         page = 1
@@ -183,7 +183,7 @@ class RssArticleCountView(View):
     """
 
     @staticmethod
-    @login_level2_required
+    @login_level1_required
     def get(request):
         title = ""
 
@@ -203,7 +203,7 @@ class RssArticleDetailsView(View):
     """
 
     @staticmethod
-    @login_level2_required
+    @login_level1_required
     def get(request, vid):
 
         ras = RssArticle.objects.filter(id=vid).using("lmonitor").values()

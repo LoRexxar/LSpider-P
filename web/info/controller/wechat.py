@@ -326,7 +326,7 @@ class WechatArticleDetailsView(View):
     """
 
     @staticmethod
-    @login_level2_required
+    @login_level1_required
     def get(request, art_id):
 
         wart = WechatArticle.objects.filter(id=art_id).using("lmonitor").values()
