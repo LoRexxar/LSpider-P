@@ -153,7 +153,7 @@ class RssArticleListView(View):
         count = len(ras)
 
         for ra in ras:
-            ra['content_html'] = remove_non_printable_basic(ra['content_html'])[:150]+"..."
+            ra['content_html'] = remove_non_printable_basic(str(ra['content_html']))[:150]+"..."
 
             local_tz = pytz.timezone('Asia/Shanghai')
             ra['publish_time'] = ra['publish_time'].replace(tzinfo=local_tz).strftime("%Y-%m-%d %H:%M:%S")

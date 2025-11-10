@@ -269,7 +269,7 @@ class WechatArticleListView(View):
         for wart in warts:
             local_tz = pytz.timezone('Asia/Shanghai')
             wart['publish_time'] = wart['publish_time'].replace(tzinfo=local_tz).strftime("%Y-%m-%d %H:%M:%S")
-            wart['content_html'] = remove_non_printable_basic(wart['content_html'])[:150]+"..."
+            wart['content_html'] = remove_non_printable_basic(str(wart['content_html']))[:150]+"..."
 
         count = len(warts)
 
