@@ -9,6 +9,7 @@
 '''
 
 import random
+import string
 
 from web.spider.models import ScanTable
 
@@ -99,3 +100,10 @@ def check_gpc_undefined(params, name, default=""):
             return params[name]
 
     return default
+
+def remove_non_printable_basic(text: str) -> str:
+    """
+    基础方法：使用string.printable过滤
+    只保留ASCII可打印字符
+    """
+    return ''.join(char for char in text if char in string.printable)
