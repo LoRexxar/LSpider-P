@@ -19,7 +19,7 @@ import datetime
 from django.views import View
 from django.http import HttpResponse, JsonResponse
 
-from utils.base import check_gpc_undefined
+from utils.base import check_gpc_undefined, remove_non_printable_basic
 from web.index.middleware import login_level1_required, login_level2_required, login_level3_required, login_level4_required, login_required
 from web.info.models import RssArticle, RssMonitorTask
 
@@ -153,7 +153,7 @@ class RssArticleListView(View):
         count = len(ras)
 
         for ra in ras:
-            ra['content_html'] = ra['content_html'][:150]+"..."
+            ra['content_html'] = remove_non_printable_basic(ra['content_html'])[:150]+"..."
 
             local_tz = pytz.timezone('Asia/Shanghai')
             ra['publish_time'] = ra['publish_time'].replace(tzinfo=local_tz).strftime("%Y-%m-%d %H:%M:%S")
